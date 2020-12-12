@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 )
 
 // ConfigDir returns the .config dir path
@@ -161,4 +163,24 @@ func LoadSettings() (Settings, error) {
 	}
 
 	return s, nil
+}
+
+// GetCliOutput ...
+func GetCliOutput() string {
+	var output []string
+	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
+	bytes, err := ioutil.ReadFile(path)
+	Check(err)
+	commands := strings.Split(string(bytes), "\n")
+	for _, command := range commands {
+		out, err := exec.Command(command).Output()
+		o := string(out)
+		if err == nil {
+			if len(o) > 38 {
+				o = o[0:38] + "..."
+			}
+			output = append(output, o)
+		}
+	}
+	return string(strings.Join(output, "\n"))
 }

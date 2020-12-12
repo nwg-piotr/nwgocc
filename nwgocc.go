@@ -7,6 +7,14 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+func setupCliLabel(str string) *gtk.Label {
+	o := GetCliOutput()
+	label, err := gtk.LabelNew(o)
+	label.SetJustify(gtk.JUSTIFY_CENTER)
+	Check(err)
+	return label
+}
+
 func main() {
 	fmt.Printf("Config dir: %s\n", ConfigDir())
 	fmt.Printf("Data dir: %s\n", DataDir())
@@ -58,7 +66,7 @@ func main() {
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 36)
 	boxOuterH.PackStart(vBox, true, true, 10)
 
-	l, _ := gtk.LabelNew("Hello, gotk3!")
+	l := setupCliLabel("Hello, gotk3!")
 
 	vBox.Add(l)
 
