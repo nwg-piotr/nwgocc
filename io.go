@@ -165,22 +165,41 @@ func LoadSettings() (Settings, error) {
 	return s, nil
 }
 
-// GetCliOutput ...
-func GetCliOutput() string {
-	var output []string
+// LoadCliCommands parses the cli_commands txt file and returns shell commands as []string slice
+func LoadCliCommands() []string {
 	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
 	bytes, err := ioutil.ReadFile(path)
 	Check(err)
-	commands := strings.Split(string(bytes), "\n")
-	for _, command := range commands {
-		out, err := exec.Command(command).Output()
-		o := string(out)
-		if err == nil {
-			if len(o) > 38 {
-				o = o[0:38] + "..."
-			}
-			output = append(output, o)
+	lines := strings.Split(string(bytes), "\n")
+	// trim whitespaces, remove commented out and empty lines
+	var output []string
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "#") && !strings.HasPrefix(line, "//") && line != "" {
+			output = append(output, line)
 		}
 	}
+	return output
+}
+
+// GetCliOutput returns output of each command as a string, separated with new lines, ready for use in cliLabel
+func GetCliOutput(commands []string) string {
+	var output []string
+	for _, command := range commands {
+		cmd := strings.Split(command, " ")
+		out, err := exec.Command(cmd[0], cmd[1:]...).Output()
+		var o string
+		if err == nil {
+			o = string(out)
+		} else {
+			o = fmt.Sprintf("%s", err)
+		}
+		if len(o) > 38 {
+			o = o[0:38] + "..."
+		}
+		o = strings.TrimSpace(o)
+		output = append(output, o)
+	}
+
 	return string(strings.Join(output, "\n"))
 }

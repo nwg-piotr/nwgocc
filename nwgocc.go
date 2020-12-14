@@ -2,28 +2,40 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"reflect"
 
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-func setupCliLabel(str string) *gtk.Label {
-	o := GetCliOutput()
+var cliCommands []string
+var tos glib.SourceHandle
+
+func setupCliLabel() *gtk.Label {
+	o := GetCliOutput(cliCommands)
 	label, err := gtk.LabelNew(o)
 	label.SetJustify(gtk.JUSTIFY_CENTER)
 	Check(err)
 	return label
 }
 
+func refreshCliLabel(label gtk.Label) {
+	//o := GetCliOutput(cliCommands)
+	label.SetText(GetCliOutput(cliCommands))
+}
+
 func main() {
-	fmt.Printf("Config dir: %s\n", ConfigDir())
-	fmt.Printf("Data dir: %s\n", DataDir())
 
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
 	Settings, err := LoadSettings()
 	Check(err)
 
-	v := reflect.ValueOf(Settings)
+	// Load user-defined CustomRows and Buttons from ~/.config/config.json
+	Config, err := LoadConfig()
+	Check(err)
+
+	v := reflect.ValueOf(Config)
 
 	values := make([]interface{}, v.NumField())
 
@@ -33,19 +45,16 @@ func main() {
 
 	fmt.Println(values)
 
-	// Load user-defined CustomRows and Buttons from ~/.config/config.json
-	Config, err := LoadConfig()
-	Check(err)
+	// Load CLI command toproduce CliLabel content
+	cliCommands = LoadCliCommands()
 
-	v = reflect.ValueOf(Config)
-
-	values = make([]interface{}, v.NumField())
-
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
+	iconsDir := ""
+	if Settings.Preferences.IconSet == "light" {
+		iconsDir = filepath.Join(DataDir(), "icons_light")
+	} else if Settings.Preferences.IconSet == "dark" {
+		iconsDir = filepath.Join(DataDir(), "icons_dark")
 	}
-
-	fmt.Println(values)
+	fmt.Println(CreatePixbuf(iconsDir, Settings.Icons.WifiOff))
 
 	gtk.Init(nil)
 
@@ -66,11 +75,16 @@ func main() {
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 36)
 	boxOuterH.PackStart(vBox, true, true, 10)
 
-	l := setupCliLabel("Hello, gotk3!")
+	cliLabel := setupCliLabel()
 
-	vBox.Add(l)
+	vBox.Add(cliLabel)
 
 	win.SetDefaultSize(300, 200)
+
+	glib.TimeoutAdd(uint(Settings.Preferences.RefreshCliSeconds*1000), func() bool {
+		refreshCliLabel(*cliLabel)
+		return true
+	})
 
 	win.ShowAll()
 
