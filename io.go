@@ -182,7 +182,8 @@ func LoadCliCommands() []string {
 	return output
 }
 
-// GetCliOutput returns output of each command as a string, separated with new lines, ready for use in cliLabel
+// GetCliOutput returns output of each command as a string, separated with new lines,
+// ready for use in cliLabel
 func GetCliOutput(commands []string) string {
 	var output []string
 	for _, command := range commands {

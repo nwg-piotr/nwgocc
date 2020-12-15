@@ -11,6 +11,9 @@ import (
 
 var cliCommands []string
 var tos glib.SourceHandle
+var iconsDir string
+
+var settings Settings
 
 func setupCliLabel() *gtk.Label {
 	o := GetCliOutput(cliCommands)
@@ -25,11 +28,26 @@ func refreshCliLabel(label gtk.Label) {
 	label.SetText(GetCliOutput(cliCommands))
 }
 
+func setupUserRow() *gtk.EventBox {
+	eventBox, _ := gtk.EventBoxNew()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	if settings.Preferences.CustomStyling {
+		hBox.SetProperty("name", "row-normal")
+	}
+
+	pixbuf := CreatePixbuf(iconsDir, settings.Icons.User, settings.Preferences.IconSizeSmall)
+	image, err := gtk.ImageNewFromPixbuf(pixbuf)
+	Check(err)
+	hBox.PackStart(image, false, false, 0)
+
+	eventBox.Add(hBox)
+	return eventBox
+}
+
 func main() {
 
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
-	Settings, err := LoadSettings()
-	Check(err)
+	settings, _ = LoadSettings()
 
 	// Load user-defined CustomRows and Buttons from ~/.config/config.json
 	Config, err := LoadConfig()
@@ -48,13 +66,13 @@ func main() {
 	// Load CLI command toproduce CliLabel content
 	cliCommands = LoadCliCommands()
 
-	iconsDir := ""
-	if Settings.Preferences.IconSet == "light" {
+	// Empty means: gtk icons in use
+	iconsDir = ""
+	if settings.Preferences.IconSet == "light" {
 		iconsDir = filepath.Join(DataDir(), "icons_light")
-	} else if Settings.Preferences.IconSet == "dark" {
+	} else if settings.Preferences.IconSet == "dark" {
 		iconsDir = filepath.Join(DataDir(), "icons_dark")
 	}
-	fmt.Println(CreatePixbuf(iconsDir, Settings.Icons.WifiOff))
 
 	gtk.Init(nil)
 
@@ -73,15 +91,19 @@ func main() {
 	boxOuterV.PackStart(boxOuterH, false, false, 10)
 
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 36)
-	boxOuterH.PackStart(vBox, true, true, 10)
+	boxOuterH.PackStart(vBox, false, false, 10)
 
 	cliLabel := setupCliLabel()
 
-	vBox.Add(cliLabel)
+	vBox.PackStart(cliLabel, false, false, 0)
+
+	userRow := setupUserRow()
+
+	vBox.PackStart(userRow, false, false, 10)
 
 	win.SetDefaultSize(300, 200)
 
-	glib.TimeoutAdd(uint(Settings.Preferences.RefreshCliSeconds*1000), func() bool {
+	glib.TimeoutAdd(uint(settings.Preferences.RefreshCliSeconds*1000), func() bool {
 		refreshCliLabel(*cliLabel)
 		return true
 	})
