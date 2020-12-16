@@ -67,6 +67,50 @@ func setupUserRow() *gtk.EventBox {
 	return eventBox
 }
 
+func setupWifiRow() *gtk.EventBox {
+	eventBox, _ := gtk.EventBoxNew()
+	styleContext, _ := eventBox.GetStyleContext()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	if settings.Preferences.CustomStyling {
+		hBox.SetProperty("name", "row-normal")
+	}
+
+	ssid := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetSsid))
+	icon := settings.Icons.WifiOff
+	if ssid != "" {
+		icon = settings.Icons.WifiOn
+	} else {
+		ssid = "disconnected"
+	}
+	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+	image, err := gtk.ImageNewFromPixbuf(pixbuf)
+	Check(err)
+	hBox.PackStart(image, false, false, 2)
+
+	label, _ := gtk.LabelNew(ssid)
+	hBox.PackStart(label, false, false, 2)
+
+	eventBox.Connect("enter-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-selected")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+		}
+	})
+
+	eventBox.Connect("leave-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-normal")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+		}
+	})
+
+	eventBox.Add(hBox)
+
+	return eventBox
+}
+
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 	key := &gdk.EventKey{Event: event}
 	if key.KeyVal() == gdk.KEY_Escape {
@@ -93,9 +137,6 @@ func main() {
 	}
 
 	fmt.Println(values)
-
-	fmt.Println(">>>>>", settings.Commands.GetBattery)
-	fmt.Println(GetCommandOutput(settings.Commands.GetBattery))
 
 	// Load CLI command toproduce CliLabel content
 	cliCommands = LoadCliCommands()
@@ -133,9 +174,15 @@ func main() {
 
 	vBox.PackStart(cliLabel, true, true, 0)
 
-	userRow := setupUserRow()
+	if settings.Preferences.ShowUserLine {
+		userRow := setupUserRow()
+		vBox.PackStart(userRow, false, false, 10)
+	}
 
-	vBox.PackStart(userRow, false, false, 10)
+	if settings.Preferences.ShowWifiLine {
+		wifiRow := setupWifiRow()
+		vBox.PackStart(wifiRow, false, false, 10)
+	}
 
 	win.SetDefaultSize(300, 200)
 

@@ -206,7 +206,9 @@ func GetCliOutput(commands []string) string {
 // GetCommandOutput returns output of a CLI command with optional arguments
 func GetCommandOutput(command string) string {
 	out, err := exec.Command("sh", "-c", command).Output()
-	Check(err)
+	if err != nil {
+		return ""
+	}
 
 	return strings.TrimSpace(string(out))
 }
