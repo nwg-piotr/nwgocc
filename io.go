@@ -204,3 +204,12 @@ func GetCliOutput(commands []string) string {
 
 	return string(strings.Join(output, "\n"))
 }
+
+// GetCommandOutput returns output of a CLI command with optional arguments
+func GetCommandOutput(command string) string {
+	cmd := strings.Split(command, " ")
+	out, err := exec.Command(cmd[0], cmd[1:]...).Output()
+	Check(err)
+
+	return strings.TrimSpace(string(out))
+}

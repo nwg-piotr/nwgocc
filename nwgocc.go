@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"reflect"
+	"time"
 
+	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
-var cliCommands []string
-var tos glib.SourceHandle
-var iconsDir string
+var (
+	cliCommands []string
+	iconsDir    string
+)
 
 var settings Settings
 
@@ -23,13 +27,13 @@ func setupCliLabel() *gtk.Label {
 	return label
 }
 
-func refreshCliLabel(label gtk.Label) {
-	//o := GetCliOutput(cliCommands)
+func updateCliLabel(label gtk.Label) {
 	label.SetText(GetCliOutput(cliCommands))
 }
 
 func setupUserRow() *gtk.EventBox {
 	eventBox, _ := gtk.EventBoxNew()
+	styleContext, _ := eventBox.GetStyleContext()
 	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
 	if settings.Preferences.CustomStyling {
 		hBox.SetProperty("name", "row-normal")
@@ -38,13 +42,41 @@ func setupUserRow() *gtk.EventBox {
 	pixbuf := CreatePixbuf(iconsDir, settings.Icons.User, settings.Preferences.IconSizeSmall)
 	image, err := gtk.ImageNewFromPixbuf(pixbuf)
 	Check(err)
-	hBox.PackStart(image, false, false, 0)
+	hBox.PackStart(image, false, false, 2)
+	name := fmt.Sprintf("%s@%s", os.Getenv("USER"), GetCommandOutput(settings.Commands.GetHost))
+	label, _ := gtk.LabelNew(name)
+	hBox.PackStart(label, false, false, 2)
+
+	eventBox.Connect("enter-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-selected")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+		}
+	})
+
+	eventBox.Connect("leave-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-normal")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+		}
+	})
 
 	eventBox.Add(hBox)
+
 	return eventBox
 }
 
+func handleKeyboard(window *gtk.Window, event *gdk.Event) {
+	key := &gdk.EventKey{Event: event}
+	if key.KeyVal() == gdk.KEY_Escape {
+		gtk.MainQuit()
+	}
+}
+
 func main() {
+	timeStart := time.Now()
 
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
 	settings, _ = LoadSettings()
@@ -84,18 +116,20 @@ func main() {
 		gtk.MainQuit()
 	})
 
+	win.Connect("key-release-event", handleKeyboard)
+
 	boxOuterV, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 36)
 	win.Add(boxOuterV)
 
 	boxOuterH, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 36)
 	boxOuterV.PackStart(boxOuterH, false, false, 10)
 
-	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 36)
-	boxOuterH.PackStart(vBox, false, false, 10)
+	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
+	boxOuterH.PackStart(vBox, true, true, 10)
 
 	cliLabel := setupCliLabel()
 
-	vBox.PackStart(cliLabel, false, false, 0)
+	vBox.PackStart(cliLabel, true, true, 0)
 
 	userRow := setupUserRow()
 
@@ -104,11 +138,12 @@ func main() {
 	win.SetDefaultSize(300, 200)
 
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshCliSeconds*1000), func() bool {
-		refreshCliLabel(*cliLabel)
+		updateCliLabel(*cliLabel)
 		return true
 	})
 
 	win.ShowAll()
 
+	fmt.Printf("Time: %v ms\n", time.Now().Sub(timeStart).Milliseconds())
 	gtk.Main()
 }
