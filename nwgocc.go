@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"time"
@@ -43,7 +42,7 @@ func setupUserRow() *gtk.EventBox {
 	image, err := gtk.ImageNewFromPixbuf(pixbuf)
 	Check(err)
 	hBox.PackStart(image, false, false, 2)
-	name := fmt.Sprintf("%s@%s", os.Getenv("USER"), GetCommandOutput(settings.Commands.GetHost))
+	name := fmt.Sprintf("%s@%s", GetCommandOutput(settings.Commands.GetUser), GetCommandOutput(settings.Commands.GetHost))
 	label, _ := gtk.LabelNew(name)
 	hBox.PackStart(label, false, false, 2)
 
@@ -94,6 +93,9 @@ func main() {
 	}
 
 	fmt.Println(values)
+
+	fmt.Println(">>>>>", settings.Commands.GetBattery)
+	fmt.Println(GetCommandOutput(settings.Commands.GetBattery))
 
 	// Load CLI command toproduce CliLabel content
 	cliCommands = LoadCliCommands()

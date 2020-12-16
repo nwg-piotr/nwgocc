@@ -187,8 +187,8 @@ func LoadCliCommands() []string {
 func GetCliOutput(commands []string) string {
 	var output []string
 	for _, command := range commands {
-		cmd := strings.Split(command, " ")
-		out, err := exec.Command(cmd[0], cmd[1:]...).Output()
+		//cmd := strings.Split(command, " ")
+		out, err := exec.Command("sh", "-c", command).Output()
 		var o string
 		if err == nil {
 			o = string(out)
@@ -207,8 +207,7 @@ func GetCliOutput(commands []string) string {
 
 // GetCommandOutput returns output of a CLI command with optional arguments
 func GetCommandOutput(command string) string {
-	cmd := strings.Split(command, " ")
-	out, err := exec.Command(cmd[0], cmd[1:]...).Output()
+	out, err := exec.Command("sh", "-c", command).Output()
 	Check(err)
 
 	return strings.TrimSpace(string(out))
