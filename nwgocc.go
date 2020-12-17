@@ -212,7 +212,7 @@ func main() {
 
 	var wifiRow *gtk.EventBox
 	if settings.Preferences.ShowWifiLine {
-		wifiRow := setupWifiRow()
+		wifiRow = setupWifiRow()
 		vBox.PackStart(wifiRow, false, false, 4)
 	}
 
