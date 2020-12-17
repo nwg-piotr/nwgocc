@@ -106,7 +106,6 @@ func setupWifiRow() *gtk.EventBox {
 			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
 		}
 	})
-
 	eventBox.Connect("leave-notify-event", func() {
 		if settings.Preferences.CustomStyling {
 			hBox.SetProperty("name", "row-normal")
@@ -114,7 +113,6 @@ func setupWifiRow() *gtk.EventBox {
 			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
 		}
 	})
-
 	eventBox.Add(hBox)
 
 	return eventBox
@@ -123,12 +121,12 @@ func setupWifiRow() *gtk.EventBox {
 func updateWifiRow() {
 	ssid := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetSsid))
 	icon := ""
-	var wifiText string
+	var status string
 	if ssid != "" {
-		wifiText = ssid
+		status = ssid
 		wifiIcon = settings.Icons.WifiOn
 	} else {
-		wifiText = "disconnected"
+		status = "disconnected"
 		wifiIcon = settings.Icons.WifiOff
 	}
 	if icon != wifiIcon {
@@ -136,7 +134,7 @@ func updateWifiRow() {
 		wifiImage.SetFromPixbuf(pixbuf)
 		wifiIcon = icon
 	}
-	wifiLabel.SetText(wifiText)
+	wifiLabel.SetText(status)
 }
 
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
@@ -183,6 +181,7 @@ func main() {
 	Check(err)
 
 	win.SetTitle("nwgcc: Control Center")
+	win.SetDecorated(settings.Preferences.WindowDecorations)
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
@@ -198,25 +197,34 @@ func main() {
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	boxOuterH.PackStart(vBox, true, true, 10)
 
-	cliLabel := setupCliLabel()
-
-	vBox.PackStart(cliLabel, true, true, 0)
+	var cliLabel *gtk.Label
+	if settings.Preferences.ShowCliLabel {
+		cliLabel = setupCliLabel()
+		vBox.PackStart(cliLabel, true, true, 4)
+		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+		vBox.PackStart(sep, true, true, 4)
+	}
 
 	if settings.Preferences.ShowUserLine {
 		userRow := setupUserRow()
-		vBox.PackStart(userRow, false, false, 10)
+		vBox.PackStart(userRow, false, false, 4)
 	}
 
+	var wifiRow *gtk.EventBox
 	if settings.Preferences.ShowWifiLine {
 		wifiRow := setupWifiRow()
-		vBox.PackStart(wifiRow, false, false, 10)
+		vBox.PackStart(wifiRow, false, false, 4)
 	}
 
 	win.SetDefaultSize(300, 200)
 
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshCliSeconds*1000), func() bool {
-		updateCliLabel(*cliLabel)
-		updateWifiRow()
+		if cliLabel != nil {
+			updateCliLabel(*cliLabel)
+		}
+		if wifiRow != nil {
+			updateWifiRow()
+		}
 		return true
 	})
 
