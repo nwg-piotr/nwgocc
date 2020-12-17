@@ -14,9 +14,15 @@ import (
 var (
 	cliCommands []string
 	iconsDir    string
+	settings    Settings
 )
 
-var settings Settings
+// These values need updates
+var (
+	wifiIcon  string // to track changes
+	wifiLabel *gtk.Label
+	wifiImage *gtk.Image
+)
 
 func setupCliLabel() *gtk.Label {
 	o := GetCliOutput(cliCommands)
@@ -76,19 +82,22 @@ func setupWifiRow() *gtk.EventBox {
 	}
 
 	ssid := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetSsid))
-	icon := settings.Icons.WifiOff
+	wifiIcon = settings.Icons.WifiOff
+	var wifiText string
 	if ssid != "" {
-		icon = settings.Icons.WifiOn
+		wifiText = ssid
+		wifiIcon = settings.Icons.WifiOn
 	} else {
-		ssid = "disconnected"
+		wifiText = "disconnected"
 	}
-	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
-	image, err := gtk.ImageNewFromPixbuf(pixbuf)
-	Check(err)
-	hBox.PackStart(image, false, false, 2)
+	pixbuf := CreatePixbuf(iconsDir, wifiIcon, settings.Preferences.IconSizeSmall)
+	wifiImage, _ = gtk.ImageNew()
+	wifiImage.SetFromPixbuf(pixbuf)
+	hBox.PackStart(wifiImage, false, false, 2)
 
-	label, _ := gtk.LabelNew(ssid)
-	hBox.PackStart(label, false, false, 2)
+	wifiLabel, _ = gtk.LabelNew(wifiText)
+	wifiLabel.SetText(wifiText)
+	hBox.PackStart(wifiLabel, false, false, 2)
 
 	eventBox.Connect("enter-notify-event", func() {
 		if settings.Preferences.CustomStyling {
@@ -109,6 +118,25 @@ func setupWifiRow() *gtk.EventBox {
 	eventBox.Add(hBox)
 
 	return eventBox
+}
+
+func updateWifiRow() {
+	ssid := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetSsid))
+	icon := ""
+	var wifiText string
+	if ssid != "" {
+		wifiText = ssid
+		wifiIcon = settings.Icons.WifiOn
+	} else {
+		wifiText = "disconnected"
+		wifiIcon = settings.Icons.WifiOff
+	}
+	if icon != wifiIcon {
+		pixbuf := CreatePixbuf(iconsDir, wifiIcon, settings.Preferences.IconSizeSmall)
+		wifiImage.SetFromPixbuf(pixbuf)
+		wifiIcon = icon
+	}
+	wifiLabel.SetText(wifiText)
 }
 
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
@@ -188,6 +216,7 @@ func main() {
 
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshCliSeconds*1000), func() bool {
 		updateCliLabel(*cliLabel)
+		updateWifiRow()
 		return true
 	})
 
