@@ -22,6 +22,10 @@ var (
 	wifiIcon  string // to track changes
 	wifiLabel *gtk.Label
 	wifiImage *gtk.Image
+
+	btIcon  string
+	btLabel *gtk.Label
+	btImage *gtk.Image
 )
 
 func setupCliLabel() *gtk.Label {
@@ -51,6 +55,16 @@ func setupUserRow() *gtk.EventBox {
 	name := fmt.Sprintf("%s@%s", GetCommandOutput(settings.Commands.GetUser), GetCommandOutput(settings.Commands.GetHost))
 	label, _ := gtk.LabelNew(name)
 	hBox.PackStart(label, false, false, 2)
+
+	if settings.Preferences.OnClickUser != "" {
+		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+		hBox.PackEnd(image, false, false, 2)
+
+		eventBox.Connect("button-press-event", func() {
+			LaunchCommand(settings.Preferences.OnClickUser)
+		})
+	}
 
 	eventBox.Connect("enter-notify-event", func() {
 		if settings.Preferences.CustomStyling {
@@ -99,6 +113,16 @@ func setupWifiRow() *gtk.EventBox {
 	wifiLabel.SetText(wifiText)
 	hBox.PackStart(wifiLabel, false, false, 2)
 
+	if settings.Preferences.OnClickWifi != "" {
+		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+		hBox.PackEnd(image, false, false, 2)
+
+		eventBox.Connect("button-press-event", func() {
+			LaunchCommand(settings.Preferences.OnClickWifi)
+		})
+	}
+
 	eventBox.Connect("enter-notify-event", func() {
 		if settings.Preferences.CustomStyling {
 			hBox.SetProperty("name", "row-selected")
@@ -124,17 +148,92 @@ func updateWifiRow() {
 	var status string
 	if ssid != "" {
 		status = ssid
-		wifiIcon = settings.Icons.WifiOn
+		icon = settings.Icons.WifiOn
 	} else {
 		status = "disconnected"
-		wifiIcon = settings.Icons.WifiOff
+		icon = settings.Icons.WifiOff
 	}
 	if icon != wifiIcon {
-		pixbuf := CreatePixbuf(iconsDir, wifiIcon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
 		wifiImage.SetFromPixbuf(pixbuf)
 		wifiIcon = icon
 	}
 	wifiLabel.SetText(status)
+}
+
+func setupBluetoothRow() *gtk.EventBox {
+	eventBox, _ := gtk.EventBoxNew()
+	styleContext, _ := eventBox.GetStyleContext()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	if settings.Preferences.CustomStyling {
+		hBox.SetProperty("name", "row-normal")
+	}
+
+	btOn := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetBluetoothStatus)) == "yes"
+	var status string
+	if btOn {
+		btIcon = settings.Icons.BtOn
+		status = fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetBluetoothName))
+	} else {
+		btIcon = settings.Icons.BtOff
+		status = "disabled"
+	}
+	pixbuf := CreatePixbuf(iconsDir, btIcon, settings.Preferences.IconSizeSmall)
+	btImage, _ = gtk.ImageNew()
+	btImage.SetFromPixbuf(pixbuf)
+	hBox.PackStart(btImage, false, false, 2)
+
+	btLabel, _ = gtk.LabelNew(status)
+	btLabel.SetText(status)
+	hBox.PackStart(btLabel, false, false, 2)
+
+	if settings.Preferences.OnClickBluetooth != "" {
+		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+		hBox.PackEnd(image, false, false, 2)
+
+		eventBox.Connect("button-press-event", func() {
+			LaunchCommand(settings.Preferences.OnClickBluetooth)
+		})
+	}
+
+	eventBox.Connect("enter-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-selected")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+		}
+	})
+	eventBox.Connect("leave-notify-event", func() {
+		if settings.Preferences.CustomStyling {
+			hBox.SetProperty("name", "row-normal")
+		} else {
+			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+		}
+	})
+	eventBox.Add(hBox)
+
+	return eventBox
+}
+
+func updateBluetoothRow() {
+	btOn := fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetBluetoothStatus)) == "yes"
+	icon := ""
+	var status string
+	if btOn {
+		icon = settings.Icons.BtOn
+		status = fmt.Sprintf("%s", GetCommandOutput(settings.Commands.GetBluetoothName))
+	} else {
+		icon = settings.Icons.BtOff
+		status = "disabled"
+	}
+	if icon != btIcon {
+		fmt.Printf("Status: %s, Icon: %s\n", status, icon)
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		btImage.SetFromPixbuf(pixbuf)
+		btIcon = icon
+	}
+	btLabel.SetText(status)
 }
 
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
@@ -216,6 +315,12 @@ func main() {
 		vBox.PackStart(wifiRow, false, false, 4)
 	}
 
+	var btRow *gtk.EventBox
+	if settings.Preferences.ShowBtLine {
+		btRow = setupBluetoothRow()
+		vBox.PackStart(btRow, false, false, 4)
+	}
+
 	win.SetDefaultSize(300, 200)
 
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshCliSeconds*1000), func() bool {
@@ -224,6 +329,9 @@ func main() {
 		}
 		if wifiRow != nil {
 			updateWifiRow()
+		}
+		if btRow != nil {
+			updateBluetoothRow()
 		}
 		return true
 	})

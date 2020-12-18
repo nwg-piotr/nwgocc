@@ -101,8 +101,8 @@ type Icons struct {
 type Commands struct {
 	GetBattery         string `json:"get_battery"`
 	GetBatteryAlt      string `json:"get_battery_alt"`
-	GetBluetoothName   string `json:"get_bluetooth_name"`
-	GetBluetoothStatus string `json:"get_bluetooth_status"`
+	GetBluetoothName   string `json:"get_bt_name"`
+	GetBluetoothStatus string `json:"get_bt_status"`
 	GetBrightness      string `json:"get_brightness"`
 	GetHost            string `json:"get_host"`
 	GetSsid            string `json:"get_ssid"`

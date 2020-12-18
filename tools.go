@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -48,4 +49,14 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 		Check(err)
 	}
 	return pixbuf
+}
+
+// LaunchCommand starts external command and quits
+func LaunchCommand(command string) {
+	elements := strings.Split(command, " ")
+	cmd := exec.Command(elements[0], elements[1:]...)
+	cmd.Run()
+	if !settings.Preferences.DontClose {
+		gtk.MainQuit()
+	}
 }
