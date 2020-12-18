@@ -64,23 +64,22 @@ func setupUserRow() *gtk.EventBox {
 		eventBox.Connect("button-press-event", func() {
 			LaunchCommand(settings.Preferences.OnClickUser)
 		})
+		eventBox.Connect("enter-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-selected")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+			}
+		})
+
+		eventBox.Connect("leave-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-normal")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+			}
+		})
 	}
-
-	eventBox.Connect("enter-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-selected")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
-		}
-	})
-
-	eventBox.Connect("leave-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-normal")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
-		}
-	})
 
 	eventBox.Add(hBox)
 
@@ -121,22 +120,22 @@ func setupWifiRow() *gtk.EventBox {
 		eventBox.Connect("button-press-event", func() {
 			LaunchCommand(settings.Preferences.OnClickWifi)
 		})
+		eventBox.Connect("enter-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-selected")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+			}
+		})
+		eventBox.Connect("leave-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-normal")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+			}
+		})
 	}
 
-	eventBox.Connect("enter-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-selected")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
-		}
-	})
-	eventBox.Connect("leave-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-normal")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
-		}
-	})
 	eventBox.Add(hBox)
 
 	return eventBox
@@ -195,22 +194,22 @@ func setupBluetoothRow() *gtk.EventBox {
 		eventBox.Connect("button-press-event", func() {
 			LaunchCommand(settings.Preferences.OnClickBluetooth)
 		})
+		eventBox.Connect("enter-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-selected")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+			}
+		})
+		eventBox.Connect("leave-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-normal")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+			}
+		})
 	}
 
-	eventBox.Connect("enter-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-selected")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_SELECTED)
-		}
-	})
-	eventBox.Connect("leave-notify-event", func() {
-		if settings.Preferences.CustomStyling {
-			hBox.SetProperty("name", "row-normal")
-		} else {
-			styleContext.SetState(gtk.STATE_FLAG_NORMAL)
-		}
-	})
 	eventBox.Add(hBox)
 
 	return eventBox
