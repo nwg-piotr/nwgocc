@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"path/filepath"
-	"reflect"
 	"time"
 
 	"github.com/gotk3/gotk3/gdk"
@@ -15,6 +14,7 @@ var (
 	cliCommands []string
 	iconsDir    string
 	settings    Settings
+	config      Configuration
 )
 
 // These values need updates
@@ -227,7 +227,6 @@ func updateBluetoothRow() {
 		status = "disabled"
 	}
 	if icon != btIcon {
-		fmt.Printf("Status: %s, Icon: %s\n", status, icon)
 		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
 		btImage.SetFromPixbuf(pixbuf)
 		btIcon = icon
@@ -249,18 +248,7 @@ func main() {
 	settings, _ = LoadSettings()
 
 	// Load user-defined CustomRows and Buttons from ~/.config/config.json
-	Config, err := LoadConfig()
-	Check(err)
-
-	v := reflect.ValueOf(Config)
-
-	values := make([]interface{}, v.NumField())
-
-	for i := 0; i < v.NumField(); i++ {
-		values[i] = v.Field(i).Interface()
-	}
-
-	fmt.Println(values)
+	config, _ = LoadConfig()
 
 	// Load CLI command toproduce CliLabel content
 	cliCommands = LoadCliCommands()
