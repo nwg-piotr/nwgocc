@@ -26,6 +26,10 @@ var (
 	btIcon  string
 	btLabel *gtk.Label
 	btImage *gtk.Image
+
+	batIcon  string
+	batLabel *gtk.Label
+	batImage *gtk.Image
 )
 
 func setupCliLabel() *gtk.Label {
@@ -242,13 +246,41 @@ func setupBatteryRow() *gtk.EventBox {
 		hBox.SetProperty("name", "row-normal")
 	}
 
+	status := ""
+	val := 0
+	if isCommand(settings.Commands.GetBattery) {
+		status, val = getBattery(settings.Commands.GetBattery)
+	} else if isCommand(settings.Commands.GetBatteryAlt) {
+		status, val = getBattery(settings.Commands.GetBatteryAlt)
+	}
+
+	switch {
+	case val > 95:
+		batIcon = settings.Icons.BatteryFull
+	case val > 50:
+		batIcon = settings.Icons.BatteryGood
+	case val > 20:
+		batIcon = settings.Icons.BatteryLow
+	default:
+		batIcon = settings.Icons.BatteryEmpty
+	}
+
+	pixbuf := CreatePixbuf(iconsDir, batIcon, settings.Preferences.IconSizeSmall)
+	batImage, _ = gtk.ImageNew()
+	batImage.SetFromPixbuf(pixbuf)
+	hBox.PackStart(batImage, false, false, 2)
+
+	batLabel, _ = gtk.LabelNew(status)
+	batLabel.SetText(status)
+	hBox.PackStart(batLabel, false, false, 2)
+
 	if settings.Preferences.OnClickBattery != "" {
 		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
 		eventBox.Connect("button-press-event", func() {
-			LaunchCommand(settings.Preferences.OnClickBluetooth)
+			LaunchCommand(settings.Preferences.OnClickBattery)
 		})
 		eventBox.Connect("enter-notify-event", func() {
 			if settings.Preferences.CustomStyling {
@@ -268,6 +300,36 @@ func setupBatteryRow() *gtk.EventBox {
 	eventBox.Add(hBox)
 
 	return eventBox
+}
+
+func updateBatteryRow() {
+	status := ""
+	val := 0
+	if isCommand(settings.Commands.GetBattery) {
+		status, val = getBattery(settings.Commands.GetBattery)
+	} else if isCommand(settings.Commands.GetBatteryAlt) {
+		status, val = getBattery(settings.Commands.GetBatteryAlt)
+	}
+	icon := ""
+	switch {
+	case val > 95:
+		icon = settings.Icons.BatteryFull
+	case val > 50:
+		icon = settings.Icons.BatteryGood
+	case val > 20:
+		icon = settings.Icons.BatteryLow
+	default:
+		icon = settings.Icons.BatteryEmpty
+	}
+
+	if icon != batIcon {
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		batImage, _ = gtk.ImageNew()
+		batImage.SetFromPixbuf(pixbuf)
+		batIcon = icon
+	}
+
+	batLabel.SetText(status)
 }
 
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
@@ -346,10 +408,10 @@ func main() {
 		vBox.PackStart(btRow, false, false, 4)
 	}
 
-	if isCommand(settings.Commands.GetBattery) {
-		fmt.Println(getBattery(settings.Commands.GetBattery))
-	} else if isCommand(settings.Commands.GetBatteryAlt) {
-		fmt.Println(getBattery(settings.Commands.GetBatteryAlt))
+	var batRow *gtk.EventBox
+	if settings.Preferences.ShowBatteryLine {
+		batRow = setupBatteryRow()
+		vBox.PackStart(batRow, false, false, 4)
 	}
 
 	win.SetDefaultSize(300, 200)
@@ -358,6 +420,15 @@ func main() {
 		if cliLabel != nil {
 			updateCliLabel(*cliLabel)
 		}
+		return true
+	})
+	glib.TimeoutAdd(uint(settings.Preferences.RefreshSlowSeconds*1000), func() bool {
+		if batRow != nil {
+			updateBatteryRow()
+		}
+		return true
+	})
+	glib.TimeoutAdd(uint(settings.Preferences.RefreshFastMillis), func() bool {
 		if wifiRow != nil {
 			updateWifiRow()
 		}
