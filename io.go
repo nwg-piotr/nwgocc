@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -211,4 +213,86 @@ func GetCommandOutput(command string) string {
 	}
 
 	return strings.TrimSpace(string(out))
+}
+
+// CheckCommands checks external commands availability
+func CheckCommands(commands Commands) {
+	fmt.Println("Checking commands availability:")
+	v := reflect.ValueOf(commands)
+	values := make([]interface{}, v.NumField())
+
+	m := make(map[string]string)
+	for i := 0; i < v.NumField(); i++ {
+		values[i] = v.Field(i).Interface()
+		cmd, _ := values[i].(string)
+		cmd = strings.Split(cmd, " ")[0]
+		available := GetCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
+		if !KeyFound(m, cmd) {
+			if available {
+				m[cmd] = "available"
+			} else {
+				m[cmd] = "not found"
+			}
+		}
+	}
+	for key, value := range m {
+		fmt.Printf("  '%s' %s\n", key, value)
+	}
+}
+
+func isCommand(command string) bool {
+	cmd := strings.Fields(command)[0]
+	return GetCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
+}
+
+func btServiceEnabled() bool {
+	if isCommand(settings.Commands.Systemctl) {
+		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled"
+	}
+	return false
+}
+
+func getBattery(command string) (string, int) {
+	msg := ""
+	perc := 0
+	if strings.Fields(command)[0] == "upower" {
+		bat := strings.Split(GetCommandOutput(command), "\n")
+		var state, time, percentage string
+		for _, line := range bat {
+			line = strings.TrimSpace(line)
+			if strings.Contains(line, "time to empty") {
+				strings.Replace(line, "time to empty", "time_to_empty", 0)
+			}
+			parts := strings.Fields(line)
+			for i, l := range parts {
+				if strings.Contains(l, "state:") {
+					state = parts[i+1]
+				}
+				if strings.Contains(l, "time_to_empty") {
+					time = parts[i+1]
+				}
+				if strings.Contains(l, "percentage") {
+					pl := len(parts[i+1])
+					percentage = parts[i+1][:pl-1]
+					p, err := strconv.Atoi(percentage)
+					if err == nil {
+						perc = p
+					}
+				}
+			}
+		}
+		msg = fmt.Sprintf("%d%% %s %s", perc, state, time)
+
+	} else if strings.Fields(command)[0] == "acpi" {
+		bat := strings.Fields(GetCommandOutput(command))
+		msg = strings.Join(bat[2:], " ")
+		pl := len(bat[3])
+		percentage := bat[3][:pl-2]
+		p, err := strconv.Atoi(percentage)
+		if err == nil {
+			perc = p
+		}
+	}
+
+	return msg, perc
 }

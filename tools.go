@@ -60,3 +60,13 @@ func LaunchCommand(command string) {
 		gtk.MainQuit()
 	}
 }
+
+// KeyFound checks if key in map[string]string
+func KeyFound(m map[string]string, key string) bool {
+	for k := range m {
+		if k == key {
+			return true
+		}
+	}
+	return false
+}
