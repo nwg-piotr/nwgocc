@@ -30,6 +30,10 @@ var (
 	batIcon  string
 	batLabel *gtk.Label
 	batImage *gtk.Image
+
+	briIcon   string
+	briSlider *gtk.Scale
+	briImage  *gtk.Image
 )
 
 func setupCliLabel() *gtk.Label {
@@ -332,6 +336,53 @@ func updateBatteryRow() {
 	batLabel.SetText(status)
 }
 
+func setupBrightnessBox() *gtk.Box {
+	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	bri := getBrightness()
+	icon := ""
+	switch {
+	case bri > 70:
+		icon = settings.Icons.BrightnessHigh
+	case bri > 30:
+		icon = settings.Icons.BrightnessMedium
+	default:
+		icon = settings.Icons.BrightnessLow
+	}
+	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+	briImage, _ = gtk.ImageNew()
+	briImage.SetFromPixbuf(pixbuf)
+	box.PackStart(briImage, false, false, 2)
+
+	briSlider, _ = gtk.ScaleNewWithRange(gtk.ORIENTATION_HORIZONTAL, 0, 100, 1)
+	briSlider.SetValue(bri)
+	briSlider.Connect("value-changed", func() {
+		b := briSlider.GetValue()
+		setBrightness(int(b))
+	})
+
+	box.PackStart(briSlider, true, true, 2)
+
+	return box
+}
+
+func updateBrightnessRow() {
+	bri := getBrightness()
+	icon := ""
+	switch {
+	case bri > 70:
+		icon = settings.Icons.BrightnessHigh
+	case bri > 30:
+		icon = settings.Icons.BrightnessMedium
+	default:
+		icon = settings.Icons.BrightnessLow
+	}
+	if icon != briIcon {
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		briImage.SetFromPixbuf(pixbuf)
+	}
+	briSlider.SetValue(bri)
+}
+
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 	key := &gdk.EventKey{Event: event}
 	if key.KeyVal() == gdk.KEY_Escape {
@@ -345,13 +396,10 @@ func main() {
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
 	settings, _ = LoadSettings()
 
-	// CheckCommands(settings.Commands)
+	//CheckCommands(settings.Commands)
 
 	// Load user-defined CustomRows and Buttons from ~/.config/config.json
 	config, _ = LoadConfig()
-
-	// Load CLI command toproduce CliLabel content
-	cliCommands = LoadCliCommands()
 
 	// Empty means: gtk icons in use
 	iconsDir = ""
@@ -385,8 +433,22 @@ func main() {
 
 	var cliLabel *gtk.Label
 	if settings.Preferences.ShowCliLabel {
-		cliLabel = setupCliLabel()
-		vBox.PackStart(cliLabel, true, true, 4)
+		cliCommands = LoadCliCommands()
+		if len(cliCommands) > 0 {
+			cliLabel = setupCliLabel()
+			vBox.PackStart(cliLabel, true, true, 4)
+			sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+			vBox.PackStart(sep, true, true, 4)
+		}
+	}
+
+	var briRow *gtk.Box
+	if settings.Preferences.ShowBrightnessSlider {
+		briRow = setupBrightnessBox()
+		vBox.PackStart(briRow, false, false, 4)
+	}
+
+	if settings.Preferences.ShowBrightnessSlider || settings.Preferences.ShowVolumeSlider {
 		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
 		vBox.PackStart(sep, true, true, 4)
 	}
@@ -429,6 +491,10 @@ func main() {
 		return true
 	})
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshFastMillis), func() bool {
+		if briRow != nil {
+			updateBrightnessRow()
+		}
+
 		if wifiRow != nil {
 			updateWifiRow()
 		}

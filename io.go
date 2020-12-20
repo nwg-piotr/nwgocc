@@ -15,7 +15,7 @@ func ConfigDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		return (fmt.Sprintf("%s/nwgcc", os.Getenv("XDG_CONFIG_HOME")))
 	}
-	return (fmt.Sprintf("%s/.config/nwgocc", os.Getenv("HOME")))
+	return (fmt.Sprintf("%s/.config/nwgcc", os.Getenv("HOME")))
 }
 
 // DataDir returns data directory path

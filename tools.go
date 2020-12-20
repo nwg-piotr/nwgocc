@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"os/exec"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 // Check ...
 func Check(e error) {
 	if e != nil {
+		log.Println(e)
 		panic(e)
 	}
 }
@@ -118,12 +120,12 @@ func getBattery(command string) (string, int) {
 	return msg, perc
 }
 
-func getBrightness() int {
-	brightness := 0
+func getBrightness() float64 {
+	brightness := 0.0
 	output := GetCommandOutput(settings.Commands.GetBrightness)
-	bri, e := strconv.ParseFloat(output, 32)
+	bri, e := strconv.ParseFloat(output, 64)
 	if e == nil {
-		brightness = int(math.Round(bri))
+		brightness = math.Round(bri)
 	}
 
 	return brightness
