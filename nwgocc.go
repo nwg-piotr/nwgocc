@@ -507,6 +507,56 @@ func updateVolumeRow() {
 	}
 }
 
+func setupCustomRow(icon, name, cmd string) *gtk.EventBox {
+	eventBox, _ := gtk.EventBoxNew()
+	styleContext, _ := eventBox.GetStyleContext()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	if settings.Preferences.CustomStyling {
+		hBox.SetProperty("name", "row-normal")
+	}
+
+	if icon != "" {
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNew()
+		image.SetFromPixbuf(pixbuf)
+		hBox.PackStart(image, false, false, 2)
+	}
+
+	if name != "" {
+		label, _ := gtk.LabelNew(name)
+		label.SetText(name)
+		hBox.PackStart(label, false, false, 2)
+	}
+
+	if cmd != "" {
+		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+		hBox.PackEnd(image, false, false, 2)
+
+		eventBox.Connect("button-press-event", func() {
+			LaunchCommand(cmd)
+		})
+		eventBox.Connect("enter-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-selected")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+			}
+		})
+		eventBox.Connect("leave-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-normal")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+			}
+		})
+	}
+
+	eventBox.Add(hBox)
+
+	return eventBox
+}
+
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 	key := &gdk.EventKey{Event: event}
 	if key.KeyVal() == gdk.KEY_Escape {
@@ -604,6 +654,16 @@ func main() {
 	if settings.Preferences.ShowBatteryLine {
 		batRow = setupBatteryRow()
 		vBox.PackStart(batRow, false, false, 4)
+	}
+
+	if settings.Preferences.ShowUserRows {
+		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+		vBox.PackStart(sep, true, true, 4)
+
+		for _, item := range config.CustomRows {
+			customRow := setupCustomRow(item.Icon, item.Name, item.Command)
+			vBox.PackStart(customRow, false, false, 4)
+		}
 	}
 
 	win.SetDefaultSize(300, 200)
