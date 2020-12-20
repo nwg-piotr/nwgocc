@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -250,49 +249,4 @@ func btServiceEnabled() bool {
 		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled"
 	}
 	return false
-}
-
-func getBattery(command string) (string, int) {
-	msg := ""
-	perc := 0
-	if strings.Fields(command)[0] == "upower" {
-		bat := strings.Split(GetCommandOutput(command), "\n")
-		var state, time, percentage string
-		for _, line := range bat {
-			line = strings.TrimSpace(line)
-			if strings.Contains(line, "time to empty") {
-				strings.Replace(line, "time to empty", "time_to_empty", 0)
-			}
-			parts := strings.Fields(line)
-			for i, l := range parts {
-				if strings.Contains(l, "state:") {
-					state = parts[i+1]
-				}
-				if strings.Contains(l, "time_to_empty") {
-					time = parts[i+1]
-				}
-				if strings.Contains(l, "percentage") {
-					pl := len(parts[i+1])
-					percentage = parts[i+1][:pl-1]
-					p, err := strconv.Atoi(percentage)
-					if err == nil {
-						perc = p
-					}
-				}
-			}
-		}
-		msg = fmt.Sprintf("%d%% %s %s", perc, state, time)
-
-	} else if strings.Fields(command)[0] == "acpi" {
-		bat := strings.Fields(GetCommandOutput(command))
-		msg = strings.Join(bat[2:], " ")
-		pl := len(bat[3])
-		percentage := bat[3][:pl-2]
-		p, err := strconv.Atoi(percentage)
-		if err == nil {
-			perc = p
-		}
-	}
-
-	return msg, perc
 }
