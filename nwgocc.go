@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 	"path/filepath"
 	"time"
 
@@ -37,8 +38,10 @@ var (
 	briImage  *gtk.Image
 
 	volIcon   string
+	playIcon  string
 	volSlider *gtk.Scale
 	volImage  *gtk.Image
+	playImage *gtk.Image
 )
 
 func setupCliLabel() *gtk.Label {
@@ -422,6 +425,48 @@ func setupVolumeRow() *gtk.Box {
 
 	box.PackStart(volSlider, true, true, 2)
 
+	if settings.Preferences.ShowPlayerctl && isCommand(settings.Commands.Playerctl) {
+		icon := settings.Icons.MediaSkipBackward
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNew()
+		image.SetFromPixbuf(pixbuf)
+		eb, _ := gtk.EventBoxNew()
+		eb.Connect("button-press-event", func() {
+			cmd := exec.Command("playerctl", "previous")
+			cmd.Run()
+		})
+		eb.Add(image)
+		box.PackStart(eb, false, false, 0)
+
+		if GetCommandOutput("playerctl status /dev/null 2>&1") == "Playing" {
+			icon = settings.Icons.MediaPlaybackPause
+		} else {
+			icon = settings.Icons.MediaPlaybackStart
+		}
+		pixbuf = CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		playImage, _ = gtk.ImageNew()
+		playImage.SetFromPixbuf(pixbuf)
+		eb, _ = gtk.EventBoxNew()
+		eb.Connect("button-press-event", func() {
+			cmd := exec.Command("playerctl", "play-pause")
+			cmd.Run()
+		})
+		eb.Add(playImage)
+		box.PackStart(eb, false, false, 0)
+
+		icon = settings.Icons.MediaSkipForward
+		pixbuf = CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		image, _ = gtk.ImageNew()
+		image.SetFromPixbuf(pixbuf)
+		eb, _ = gtk.EventBoxNew()
+		eb.Connect("button-press-event", func() {
+			cmd := exec.Command("playerctl", "next")
+			cmd.Run()
+		})
+		eb.Add(image)
+		box.PackStart(eb, false, false, 0)
+	}
+
 	return box
 }
 
@@ -449,6 +494,17 @@ func updateVolumeRow() {
 	}
 
 	volSlider.SetValue(float64(vol))
+
+	if GetCommandOutput("playerctl status /dev/null 2>&1") == "Playing" {
+		icon = settings.Icons.MediaPlaybackPause
+	} else {
+		icon = settings.Icons.MediaPlaybackStart
+	}
+	if icon != playIcon {
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		playImage.SetFromPixbuf(pixbuf)
+		playIcon = icon
+	}
 }
 
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
