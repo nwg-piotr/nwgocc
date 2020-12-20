@@ -8,6 +8,7 @@ import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+	"github.com/itchyny/volume-go"
 )
 
 var (
@@ -34,6 +35,10 @@ var (
 	briIcon   string
 	briSlider *gtk.Scale
 	briImage  *gtk.Image
+
+	volIcon   string
+	volSlider *gtk.Scale
+	volImage  *gtk.Image
 )
 
 func setupCliLabel() *gtk.Label {
@@ -383,6 +388,69 @@ func updateBrightnessRow() {
 	briSlider.SetValue(bri)
 }
 
+func setupVolumeBox() *gtk.Box {
+	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	vol, _ := volume.GetVolume()
+	muted, err := volume.GetMuted()
+	Check(err)
+	icon := ""
+	if !muted {
+		switch {
+		case vol > 70:
+			icon = settings.Icons.VolumeHigh
+		case vol > 30:
+			icon = settings.Icons.VolumeMedium
+		default:
+			icon = settings.Icons.VolumeLow
+		}
+	} else {
+		icon = settings.Icons.VolumeMuted
+	}
+
+	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+	volImage, _ = gtk.ImageNew()
+	volImage.SetFromPixbuf(pixbuf)
+	box.PackStart(volImage, false, false, 2)
+
+	volSlider, _ = gtk.ScaleNewWithRange(gtk.ORIENTATION_HORIZONTAL, 0, 100, 1)
+	volSlider.SetValue(float64(vol))
+	volSlider.Connect("value-changed", func() {
+		b := volSlider.GetValue()
+		err := volume.SetVolume(int(b))
+		Check(err)
+	})
+
+	box.PackStart(volSlider, true, true, 2)
+
+	return box
+}
+
+func updateVolumeRow() {
+	vol, _ := volume.GetVolume()
+	muted, err := volume.GetMuted()
+	Check(err)
+	icon := ""
+	if !muted {
+		switch {
+		case vol > 70:
+			icon = settings.Icons.VolumeHigh
+		case vol > 30:
+			icon = settings.Icons.VolumeMedium
+		default:
+			icon = settings.Icons.VolumeLow
+		}
+	} else {
+		icon = settings.Icons.VolumeMuted
+	}
+
+	if icon != volIcon {
+		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		volImage.SetFromPixbuf(pixbuf)
+	}
+
+	volSlider.SetValue(float64(vol))
+}
+
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 	key := &gdk.EventKey{Event: event}
 	if key.KeyVal() == gdk.KEY_Escape {
@@ -448,6 +516,12 @@ func main() {
 		vBox.PackStart(briRow, false, false, 4)
 	}
 
+	var volRow *gtk.Box
+	if settings.Preferences.ShowVolumeSlider {
+		volRow = setupVolumeBox()
+		vBox.PackStart(volRow, false, false, 4)
+	}
+
 	if settings.Preferences.ShowBrightnessSlider || settings.Preferences.ShowVolumeSlider {
 		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
 		vBox.PackStart(sep, true, true, 4)
@@ -493,6 +567,10 @@ func main() {
 	glib.TimeoutAdd(uint(settings.Preferences.RefreshFastMillis), func() bool {
 		if briRow != nil {
 			updateBrightnessRow()
+		}
+
+		if volRow != nil {
+			updateVolumeRow()
 		}
 
 		if wifiRow != nil {
