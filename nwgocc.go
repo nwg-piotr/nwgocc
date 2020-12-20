@@ -341,7 +341,7 @@ func updateBatteryRow() {
 	batLabel.SetText(status)
 }
 
-func setupBrightnessBox() *gtk.Box {
+func setupBrightnessRow() *gtk.Box {
 	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
 	bri := getBrightness()
 	icon := ""
@@ -388,7 +388,7 @@ func updateBrightnessRow() {
 	briSlider.SetValue(bri)
 }
 
-func setupVolumeBox() *gtk.Box {
+func setupVolumeRow() *gtk.Box {
 	box, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
 	vol, _ := volume.GetVolume()
 	muted, err := volume.GetMuted()
@@ -512,13 +512,13 @@ func main() {
 
 	var briRow *gtk.Box
 	if settings.Preferences.ShowBrightnessSlider {
-		briRow = setupBrightnessBox()
+		briRow = setupBrightnessRow()
 		vBox.PackStart(briRow, false, false, 4)
 	}
 
 	var volRow *gtk.Box
 	if settings.Preferences.ShowVolumeSlider {
-		volRow = setupVolumeBox()
+		volRow = setupVolumeRow()
 		vBox.PackStart(volRow, false, false, 4)
 	}
 
