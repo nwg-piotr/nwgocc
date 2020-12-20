@@ -29,6 +29,7 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 		iconPath = icon
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 		if err != nil {
+			fmt.Println(err)
 			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
 				"icons_light/icon-missing.svg"), size, size)
 			Check(err)
@@ -48,9 +49,15 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 	iconPath = filepath.Join(iconsDir, fmt.Sprintf("%s.svg", icon))
 	pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 	if err != nil {
-		pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
-			"icons_light/icon-missing.svg"), size, size)
-		Check(err)
+		iconTheme, _ := gtk.IconThemeGetDefault()
+		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+
+		if err != nil {
+			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
+				"icons_light/icon-missing.svg"), size, size)
+			Check(err)
+		}
+		return pixbuf
 	}
 	return pixbuf
 }

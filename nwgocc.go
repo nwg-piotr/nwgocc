@@ -579,8 +579,12 @@ func main() {
 	iconsDir = ""
 	if settings.Preferences.IconSet == "light" {
 		iconsDir = filepath.Join(DataDir(), "icons_light")
+		fmt.Println("Icons: Custom light")
 	} else if settings.Preferences.IconSet == "dark" {
 		iconsDir = filepath.Join(DataDir(), "icons_dark")
+		fmt.Println("Icons: Custom dark")
+	} else {
+		fmt.Println("Icons: GTK")
 	}
 
 	gtk.Init(nil)
