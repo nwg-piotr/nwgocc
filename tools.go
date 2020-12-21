@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gotk3/gotk3/gdk"
+	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -58,6 +59,7 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 			Check(err)
 		}
 		return pixbuf
+
 	}
 	return pixbuf
 }
@@ -66,9 +68,13 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 func LaunchCommand(command string) {
 	elements := strings.Split(command, " ")
 	cmd := exec.Command(elements[0], elements[1:]...)
-	cmd.Run()
+	go cmd.Run()
 	if !settings.Preferences.DontClose {
-		gtk.MainQuit()
+		glib.TimeoutAdd(uint(100), func() bool {
+			gtk.MainQuit()
+			return false
+		})
+
 	}
 }
 

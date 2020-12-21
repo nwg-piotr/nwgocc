@@ -557,6 +557,45 @@ func setupCustomRow(icon, name, cmd string) *gtk.EventBox {
 	return eventBox
 }
 
+func setupPreferencesButton() *gtk.Button {
+	button, _ := gtk.ButtonNew()
+	if settings.Preferences.CustomStyling {
+		button.SetProperty("name", "custom-button")
+	}
+	pixbuf := CreatePixbuf(iconsDir, "emblem-system-symbolic", settings.Preferences.IconSizeLarge)
+	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+	button.SetImage(image)
+	button.SetAlwaysShowImage(true)
+	button.SetTooltipText("Preferences")
+	button.Connect("clicked", func() {
+		/* We are going to use the python version: nwgcc --settings, so the program must be terminated,
+		regardless of the user's preferences. Let's override them this single time */
+		settings.Preferences.DontClose = false
+		LaunchCommand("nwgcc")
+	})
+
+	return button
+}
+
+func setupCustomButton(icon, name, cmd string) *gtk.Button {
+	button, _ := gtk.ButtonNew()
+	if settings.Preferences.CustomStyling {
+		button.SetProperty("name", "custom-button")
+	}
+	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeLarge)
+	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+	button.SetImage(image)
+	button.SetAlwaysShowImage(true)
+	if name != "" {
+		button.SetTooltipText(name)
+	}
+	button.Connect("clicked", func() {
+		LaunchCommand(cmd)
+	})
+
+	return button
+}
+
 func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 	key := &gdk.EventKey{Event: event}
 	if key.KeyVal() == gdk.KEY_Escape {
@@ -616,7 +655,7 @@ func main() {
 			cliLabel = setupCliLabel()
 			vBox.PackStart(cliLabel, true, true, 4)
 			sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-			vBox.PackStart(sep, true, true, 4)
+			vBox.PackStart(sep, true, true, 6)
 		}
 	}
 
@@ -634,7 +673,7 @@ func main() {
 
 	if settings.Preferences.ShowBrightnessSlider || settings.Preferences.ShowVolumeSlider {
 		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-		vBox.PackStart(sep, true, true, 4)
+		vBox.PackStart(sep, true, true, 6)
 	}
 
 	if settings.Preferences.ShowUserLine {
@@ -662,13 +701,30 @@ func main() {
 
 	if settings.Preferences.ShowUserRows {
 		sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
-		vBox.PackStart(sep, true, true, 4)
+		vBox.PackStart(sep, true, true, 6)
 
 		for _, item := range config.CustomRows {
 			customRow := setupCustomRow(item.Icon, item.Name, item.Command)
 			vBox.PackStart(customRow, false, false, 4)
 		}
 	}
+
+	sep, _ := gtk.SeparatorNew(gtk.ORIENTATION_HORIZONTAL)
+	vBox.PackStart(sep, true, true, 6)
+
+	buttonBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+
+	preferencesButton := setupPreferencesButton()
+	buttonBox.PackStart(preferencesButton, true, false, 4)
+
+	if settings.Preferences.ShowUserButtons {
+		for _, item := range config.Buttons {
+			customBtn := setupCustomButton(item.Icon, item.Name, item.Command)
+			buttonBox.PackStart(customBtn, true, false, 4)
+		}
+	}
+
+	vBox.PackStart(buttonBox, false, false, 8)
 
 	win.SetDefaultSize(300, 200)
 
