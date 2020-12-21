@@ -571,7 +571,7 @@ func setupPreferencesButton() *gtk.Button {
 		/* We are going to use the python version: nwgcc --settings, so the program must be terminated,
 		regardless of the user's preferences. Let's override them this single time */
 		settings.Preferences.DontClose = false
-		LaunchCommand("nwgcc")
+		LaunchCommand("nwgcc -s")
 	})
 
 	return button
