@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -12,12 +14,19 @@ import (
 	"github.com/itchyny/volume-go"
 )
 
+var version = "0.0.1"
+
 var (
 	cliCommands []string
 	iconsDir    string
 	settings    Settings
 	config      Configuration
 )
+
+var customCSS = flag.String("css", "style.css", "custom css file name")
+var debug = flag.Bool("d", false, "do checks, print results")
+var displayVersion = flag.Bool("v", false, "display version information")
+var winPosPointer = flag.Bool("p", false, "place window at the mouse pointer position (Xorg only)")
 
 // These values need updates
 var (
@@ -607,10 +616,19 @@ func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 func main() {
 	timeStart := time.Now()
 
+	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("nwgocc version %s\n", version)
+		os.Exit(0)
+	}
+
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
 	settings, _ = LoadSettings()
 
-	//CheckCommands(settings.Commands)
+	if *debug {
+		CheckCommands(settings.Commands)
+	}
 
 	// Load user-defined CustomRows and Buttons from ~/.config/config.json
 	config, _ = LoadConfig()
@@ -630,12 +648,14 @@ func main() {
 	gtk.Init(nil)
 
 	if settings.Preferences.CustomStyling {
-		css := filepath.Join(ConfigDir(), "style.css")
+		css := filepath.Join(ConfigDir(), *customCSS)
 		fmt.Printf("Style: %s\n", css)
 		cssProvider, err := gtk.CssProviderNew()
 		Check(err)
 		err = cssProvider.LoadFromPath(css)
-		Check(err)
+		if err != nil {
+			fmt.Println(err)
+		}
 		screen, _ := gdk.ScreenGetDefault()
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
 	}
@@ -646,6 +666,9 @@ func main() {
 	win.SetTitle("nwgcc: Control Center")
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
+	if *winPosPointer {
+		win.SetPosition(gtk.WIN_POS_MOUSE)
+	}
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
 	})
