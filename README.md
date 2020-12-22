@@ -35,4 +35,4 @@ go build -o nwgocc
 4. Place the `nwgocc` file (or a link to it) in `/usr/bin/` or your preferred binary files location.
 
 Alternatively you may give a try to the x86_64 binary in the [bin](https://github.com/nwg-piotr/nwgocc/tree/master/bin)
-folder. Download it and rename to `nwgocc`.
+folder. Download it, rename to `nwgocc` and make executable.
