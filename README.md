@@ -9,11 +9,11 @@ At the moment just the main program window has been implemented. Clicking the Pr
 `nwgocc` and run the python code with the settings window open. As long as I have enough time and ~~beer~~ coffee,
 the preferences-related part may be written in the future.
 
-**Note** This is my very first more serious Go code. I'm 100% sure it may (should) be improved in many ways. 
+**Note** This is my very first more serious code in golang. I'm 100% sure it may (should) be improved in many ways.
 
 ## Installation
 
-Install [nwgcc](https://github.com/nwg-piotr/nwgcc) first. Take a close look at optional dependencies. In case you
+0. Install [nwgcc](https://github.com/nwg-piotr/nwgcc) first. Take a close look at optional dependencies. In case you
 decide not to use the `nwgcc` command any longer, you may omit the `python-pyalsa` package.
 
 1. Clone the repository, install the `go` package (make dependency).
@@ -32,4 +32,7 @@ go get github.com/itchyny/volume-go/cmd/volume
 go build -o nwgocc
 ```
 
-Or you may give a try to the x86_64 binary in the `bin` folder. Download it and rename to `nwgocc`.
+4. Place the `nwgocc` file (or a link to it) in `/usr/bin/` or your preferred binary files location.
+
+Alternatively you may give a try to the x86_64 binary in the [bin](https://github.com/nwg-piotr/nwgocc/tree/master/bin)
+folder. Download it and rename to `nwgocc`.
