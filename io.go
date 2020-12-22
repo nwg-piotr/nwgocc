@@ -195,7 +195,7 @@ func GetCliOutput(commands []string) string {
 			o = fmt.Sprintf("%s", err)
 		}
 		if len(o) > 38 {
-			o = o[0:38] + "..."
+			o = o[0:38] + "…"
 		}
 		o = strings.TrimSpace(o)
 		output = append(output, o)

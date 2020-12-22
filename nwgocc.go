@@ -47,6 +47,7 @@ var (
 func setupCliLabel() *gtk.Label {
 	o := GetCliOutput(cliCommands)
 	label, err := gtk.LabelNew(o)
+	label.SetProperty("name", "cli-label")
 	label.SetJustify(gtk.JUSTIFY_CENTER)
 	Check(err)
 	return label
@@ -628,10 +629,22 @@ func main() {
 
 	gtk.Init(nil)
 
+	if settings.Preferences.CustomStyling {
+		css := filepath.Join(ConfigDir(), "style.css")
+		fmt.Printf("Style: %s\n", css)
+		cssProvider, err := gtk.CssProviderNew()
+		Check(err)
+		err = cssProvider.LoadFromPath(css)
+		Check(err)
+		screen, _ := gdk.ScreenGetDefault()
+		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
+	}
+
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	Check(err)
 
 	win.SetTitle("nwgcc: Control Center")
+	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
 	win.Connect("destroy", func() {
 		gtk.MainQuit()
