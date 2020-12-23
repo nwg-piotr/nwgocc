@@ -16,3 +16,6 @@
 
 # test build
 nwgocc
+
+# glade backups
+*.glade~
