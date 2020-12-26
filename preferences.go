@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"log"
+	"strings"
 
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -17,6 +18,8 @@ func setupPreferencesWindow() {
 
 	win, err := isWindow(obj)
 	Check(err)
+
+	setCliLabelContent(builder, "cli_textview")
 
 	setCheckButtonState(builder, "checkbutton_cli_label", settings.Preferences.ShowCliLabel)
 	setCheckButtonState(builder, "checkbutton_brightness_slider", settings.Preferences.ShowBrightnessSlider)
@@ -37,6 +40,15 @@ func setupPreferencesWindow() {
 	setCheckButtonState(builder, "checkbutton_custom_css", settings.Preferences.CustomStyling)
 	setCheckButtonState(builder, "checkbutton_keep_open", settings.Preferences.DontClose)
 	setCheckButtonState(builder, "checkbutton_window_decorations", settings.Preferences.WindowDecorations)
+
+	setIconsSetComboState(builder, "combo_box_icons")
+
+	setSpinbuttonValue(builder, "spinbutton_small_icon", settings.Preferences.IconSizeSmall, 8, 64)
+	setSpinbuttonValue(builder, "spinbutton_large_icon", settings.Preferences.IconSizeLarge, 8, 64)
+
+	setSpinbuttonValue(builder, "spinbutton_refresh_cli", settings.Preferences.RefreshCliSeconds, 0, 3600)
+	setSpinbuttonValue(builder, "spinbutton_refresh_sliders", settings.Preferences.RefreshFastMillis, 0, 1000)
+	setSpinbuttonValue(builder, "spinbutton_refresh_battery", settings.Preferences.RefreshSlowSeconds, 0, 60)
 
 	win.Show()
 }
@@ -70,5 +82,42 @@ func setButtonImage(builder *gtk.Builder, id string, icon string) {
 		image, err := gtk.ImageNewFromPixbuf(pixbuf)
 		Check(err)
 		btn.SetImage(image)
+	}
+}
+
+func setCliLabelContent(builder *gtk.Builder, id string) {
+	obj, err := builder.GetObject(id)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if tv, ok := obj.(*gtk.TextView); ok {
+		buffer, _ := tv.GetBuffer()
+
+		buffer.SetText(strings.Join(cliCommands, "\n"))
+	}
+}
+
+func setIconsSetComboState(builder *gtk.Builder, id string) {
+	obj, err := builder.GetObject(id)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if cb, ok := obj.(*gtk.ComboBoxText); ok {
+		cb.SetActiveID(settings.Preferences.IconSet)
+	}
+}
+
+func setSpinbuttonValue(builder *gtk.Builder, id string, value int, min, max float64) {
+	obj, err := builder.GetObject(id)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if sb, ok := obj.(*gtk.SpinButton); ok {
+		sb.SetRange(min, max)
+		sb.SetIncrements(1, 1)
+		sb.SetValue(float64(value))
 	}
 }

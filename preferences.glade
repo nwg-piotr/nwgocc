@@ -23,12 +23,13 @@
             <property name="margin-top">10</property>
             <property name="margin-bottom">10</property>
             <child>
-              <!-- n-columns=3 n-rows=12 -->
+              <!-- n-columns=3 n-rows=13 -->
               <object class="GtkGrid" id="grid">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="row-spacing">10</property>
                 <property name="column-spacing">10</property>
+                <property name="column-homogeneous">True</property>
                 <child>
                   <object class="GtkLabel" id="label">
                     <property name="visible">True</property>
@@ -49,7 +50,7 @@
                     <property name="window-placement-set">False</property>
                     <property name="shadow-type">in</property>
                     <child>
-                      <object class="GtkTextView" id="cli_label">
+                      <object class="GtkTextView" id="cli_textview">
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                       </object>
@@ -370,13 +371,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBoxText">
+                  <object class="GtkComboBoxText" id="combo_box_icons">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <items>
-                      <item translatable="yes">Light icons</item>
-                      <item translatable="yes">Dark icons</item>
-                      <item translatable="yes">GTK icons</item>
+                      <item id="light" translatable="yes">Light icons</item>
+                      <item id="dark" translatable="yes">Dark icons</item>
+                      <item id="gtk" translatable="yes">GTK icons</item>
                     </items>
                   </object>
                   <packing>
@@ -388,6 +389,10 @@
                   <object class="GtkSpinButton" id="spinbutton_small_icon">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="double-buffered">False</property>
+                    <property name="width-chars">0</property>
+                    <property name="snap-to-ticks">True</property>
+                    <property name="numeric">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -398,6 +403,9 @@
                   <object class="GtkSpinButton" id="spinbutton_large_icon">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="double-buffered">False</property>
+                    <property name="snap-to-ticks">True</property>
+                    <property name="numeric">True</property>
                   </object>
                   <packing>
                     <property name="left-attach">2</property>
@@ -444,22 +452,157 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">CLI label refresh rate [s]</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">10</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Sliders, Wi-Fi, BT [ms]</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">10</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Battery feresh rate [s]</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">10</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkSpinButton" id="spinbutton_refresh_cli">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="double-buffered">False</property>
+                    <property name="snap-to-ticks">True</property>
+                    <property name="numeric">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">11</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkSpinButton" id="spinbutton_refresh_sliders">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="double-buffered">False</property>
+                    <property name="snap-to-ticks">True</property>
+                    <property name="numeric">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">11</property>
+                  </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkSpinButton" id="spinbutton_refresh_battery">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="double-buffered">False</property>
+                    <property name="snap-to-ticks">True</property>
+                    <property name="numeric">True</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">2</property>
+                    <property name="top-attach">11</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="spacing">4</property>
+                    <property name="homogeneous">True</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">User rows</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">User buttons</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">Icons</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">Cancel</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">Apply</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="receives-default">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">12</property>
+                    <property name="width">3</property>
+                  </packing>
                 </child>
                 <child>
                   <placeholder/>
