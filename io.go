@@ -140,8 +140,9 @@ func LoadConfig() (Configuration, error) {
 }
 
 // SaveConfig saves current Configuration to a json file
-func SaveConfig(c Configuration, path string) error {
-	bytes, err := json.MarshalIndent(c, "", "  ")
+func SaveConfig() error {
+	path := fmt.Sprintf("%s/config.json", ConfigDir())
+	bytes, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -166,6 +167,17 @@ func LoadSettings() (Settings, error) {
 	return s, nil
 }
 
+// SaveSettings saves current settings to a json file
+func SaveSettings() error {
+	path := fmt.Sprintf("%s/preferences.json", DataDir())
+	bytes, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, bytes, 0644)
+}
+
 // LoadCliCommands parses the cli_commands txt file and returns shell commands as []string slice
 func LoadCliCommands() []string {
 	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
@@ -181,6 +193,13 @@ func LoadCliCommands() []string {
 		}
 	}
 	return output
+}
+
+func saveCliFile(s string) {
+	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
+	b := []byte(s)
+	err := ioutil.WriteFile(path, b, 0644)
+	Check(err)
 }
 
 // GetCliOutput returns output of each command as a string, separated with new lines, ready for use in cliLabel
@@ -246,7 +265,7 @@ func isCommand(command string) bool {
 
 func btServiceEnabled() bool {
 	if isCommand(settings.Commands.Systemctl) {
-		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled"
+		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled" && GetCommandOutput("systemctl is-active bluetooth.service") == "active"
 	}
 	return false
 }

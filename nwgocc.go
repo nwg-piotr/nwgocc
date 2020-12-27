@@ -685,9 +685,9 @@ func main() {
 	vBox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 0)
 	boxOuterH.PackStart(vBox, true, true, 10)
 
+	cliCommands = LoadCliCommands()
 	var cliLabel *gtk.Label
 	if settings.Preferences.ShowCliLabel {
-		cliCommands = LoadCliCommands()
 		if len(cliCommands) > 0 {
 			cliLabel = setupCliLabel()
 			vBox.PackStart(cliLabel, true, true, 4)
