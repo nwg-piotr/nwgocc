@@ -1,0 +1,21 @@
+{
+  "custom_rows": [
+    {
+      "name": "GIMP",
+      "cmd": "gimp",
+      "icon": "gimp"
+    },
+    {
+      "name": "Lock screen",
+      "cmd": "swaylock -f -c 000000",
+      "icon": "system-lock-screen"
+    }
+  ],
+  "buttons": [
+    {
+      "name": "Exit",
+      "cmd": "",
+      "icon": "system-shutdown-symbolic"
+    }
+  ]
+}

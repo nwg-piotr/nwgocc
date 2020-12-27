@@ -1,0 +1,127 @@
+/*** Application window ***/
+#window {
+    background-color: rgba (72, 72, 70, 1.0);
+	/* background-image: url("/home/piotr/.config/nwg-launchers/nwgbar/bricks.png"); */
+	/* border-radius: 10px; */
+	border-style: none;
+	border-width: 1px;
+	border-color: rgba (248, 132, 97, 1.0);
+	color: #eee
+}
+
+/* Custom rows */
+#row-normal {
+    padding: 2px;
+    color: #eee
+}
+
+#row-selected {
+    padding: 2px;
+    background-color: rgba (248, 132, 97, 1.0);
+    border-radius: 5px;
+    color: #333
+}
+
+#cli-label {
+    font-family: monospace;
+    padding: 4px;
+    border-radius: 3px;
+    color: #eee
+}
+
+/* Sliders */
+scale value {
+    color: #eee
+}
+
+scale highlight {
+    background-color: rgba (248, 132, 97, 1.0);
+}
+
+#custom-button, image {
+	background: none;
+	box-shadow: none;
+	color: #999
+}
+
+button {
+    background-color: rgba (0, 0, 0, 0.1);
+    box-shadow: none;
+    border-radius: 7px;
+    border-color: rgba (248, 132, 97, 0.7);
+    margin-left: 5px;
+    margin-right: 5px;
+	color: #eee
+}
+
+button:hover {
+	background-color: rgba (248, 132, 97, 1.0);
+	color: #eee
+}
+
+#custom-button {
+    background-color: rgba (0, 0, 0, 0.1);
+    box-shadow: none;
+    border-radius: 7px;
+    border-style: solid;
+    border-color: rgba (248, 132, 97, 0.7);
+    padding: 4px;
+	color: #eee
+}
+
+#custom-button:hover {
+	background-color: rgba (248, 132, 97, 1.0);
+	color: #eee
+}
+
+menu {
+    background-color: rgba (72, 72, 70, 1.0);
+    color: #eee
+}
+
+menuitem {
+	color: #eee
+}
+
+menuitem:hover {
+    background-color: rgba (248, 132, 97, 0.7)
+}
+
+textview.view text {
+    background-color: rgba (72, 72, 70, 1.0);
+    color: #eee
+}
+
+/*** Preferences window ***/
+#preferences {
+    background-color: rgba (64, 64, 60, 1.0)
+}
+
+spinbutton.horizontal {
+    background-color: rgba (64, 64, 60, 1.0);
+    border-radius: 7px;
+    border-style: solid;
+    border-color: rgba (248, 132, 97, 0.5);
+    color: #eee
+}
+
+
+/*** USER CONTENT EDITION WINDOW ***/
+#user-form {
+    background-color: rgba (72, 72, 70, 1.0);
+    border-style: solid;
+	border-width: 1px;
+	border-color: rgba (248, 132, 97, 1.0);
+	color: #eee
+}
+
+/* Text input */
+#edit-field {
+    background-color: rgba (64, 64, 60, 1.0);
+	border-style: none;
+	color: #eee
+}
+
+label {
+	color: #eee
+}

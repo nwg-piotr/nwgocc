@@ -16,7 +16,7 @@ var prefWindow *gtk.Window
 var cliTextView *gtk.TextView
 
 func setupPreferencesWindow() {
-	builder, err := gtk.BuilderNewFromFile("preferences.glade")
+	builder, err := gtk.BuilderNewFromFile("/usr/share/nwgocc/preferences.glade")
 	Check(err)
 
 	obj, err := builder.GetObject("preferences_window")
