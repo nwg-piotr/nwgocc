@@ -93,10 +93,22 @@ func setupPreferencesWindow() {
 	})
 
 	// Buttons to edit user-defined commands assigned to built-in rows
-	setButtonImage(builder, "cmd_btn_user", settings.Icons.ClickMe)
-	setButtonImage(builder, "cmd_btn_wifi", settings.Icons.ClickMe)
-	setButtonImage(builder, "cmd_btn_bt", settings.Icons.ClickMe)
-	setButtonImage(builder, "cmd_btn_battery", settings.Icons.ClickMe)
+	btnUser := setButtonImage(builder, "cmd_btn_user", settings.Icons.ClickMe)
+	btnUser.Connect("clicked", func() {
+		setupCmdDialog(&settings.Preferences.OnClickUser)
+	})
+	btnWifi := setButtonImage(builder, "cmd_btn_wifi", settings.Icons.ClickMe)
+	btnWifi.Connect("clicked", func() {
+		setupCmdDialog(&settings.Preferences.OnClickWifi)
+	})
+	btnBt := setButtonImage(builder, "cmd_btn_bt", settings.Icons.ClickMe)
+	btnBt.Connect("clicked", func() {
+		setupCmdDialog(&settings.Preferences.OnClickBluetooth)
+	})
+	btnBattery := setButtonImage(builder, "cmd_btn_battery", settings.Icons.ClickMe)
+	btnBattery.Connect("clicked", func() {
+		setupCmdDialog(&settings.Preferences.OnClickBattery)
+	})
 
 	// Lower checkboxes for various boolean settings
 	cbCustomStyling := setUpCheckButton(builder, "checkbutton_custom_css", settings.Preferences.CustomStyling)
@@ -203,18 +215,20 @@ func setUpSpinbutton(builder *gtk.Builder, id string, value int, min, max float6
 	return nil
 }
 
-func setButtonImage(builder *gtk.Builder, id string, icon string) {
+func setButtonImage(builder *gtk.Builder, id string, icon string) *gtk.Button {
 	obj, err := builder.GetObject(id)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil
 	}
 	if btn, ok := obj.(*gtk.Button); ok {
 		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
 		image, err := gtk.ImageNewFromPixbuf(pixbuf)
 		Check(err)
 		btn.SetImage(image)
+		return btn
 	}
+	return nil
 }
 
 func setUpCliTextView(builder *gtk.Builder, id string) *gtk.TextView {
@@ -270,4 +284,42 @@ func saveCliCommands() {
 	end := buffer.GetEndIter()
 	s, _ := buffer.GetText(start, end, true)
 	saveCliFile(s)
+}
+
+func setupCmdDialog(command *string) {
+	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+	Check(err)
+
+	win.SetTransientFor(prefWindow)
+	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG)
+	win.SetTitle("nwgcc: Edit command")
+	win.SetProperty("name", "preferences")
+	win.Connect("key-release-event", handleEscape)
+
+	vbox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
+	hbox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	vbox.PackStart(hbox, true, true, 6)
+	win.Add(vbox)
+
+	entry, _ := gtk.EntryNew()
+	entry.SetWidthChars(25)
+	entry.SetText(*command)
+	hbox.PackStart(entry, true, true, 3)
+
+	btnCancel, _ := gtk.ButtonNew()
+	btnCancel.SetLabel("Cancel")
+	btnCancel.Connect("clicked", func() {
+		win.Close()
+	})
+	hbox.PackStart(btnCancel, false, false, 3)
+
+	btnApply, _ := gtk.ButtonNew()
+	btnApply.SetLabel("Apply")
+	btnApply.Connect("clicked", func() {
+		*command, _ = entry.GetText()
+		win.Close()
+	})
+	hbox.PackStart(btnApply, false, false, 3)
+
+	win.ShowAll()
 }
