@@ -53,6 +53,8 @@ var (
 	playImage *gtk.Image
 )
 
+var configChanged = false
+
 func setupCliLabel() *gtk.Label {
 	o := GetCliOutput(cliCommands)
 	label, err := gtk.LabelNew(o)

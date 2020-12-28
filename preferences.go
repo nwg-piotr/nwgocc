@@ -183,6 +183,10 @@ func setupPreferencesWindow() {
 		saveCliCommands()
 		err := SaveSettings()
 		Check(err)
+		if configChanged {
+			err := SaveConfig()
+			Check(err)
+		}
 		gtk.MainQuit()
 	})
 
@@ -365,6 +369,8 @@ func setupTemplateEditionWindow(definitions interface{}) {
 	label.SetHAlign(gtk.ALIGN_START)
 	grid.Attach(label, 2, 0, 1, 1)
 
+	lastRow := 0
+
 	switch definitions.(type) {
 	case *[]CustomRow:
 		win.SetTitle("nwgcc: Edit User Rows")
@@ -379,15 +385,214 @@ func setupTemplateEditionWindow(definitions interface{}) {
 			entry.SetText(d.Command)
 			grid.Attach(entry, 1, i+1, 1, 1)
 
-			entry, _ = gtk.EntryNew()
-			entry.SetWidthChars(40)
-			entry.SetText(d.Icon)
-			entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, d.Icon, settings.Preferences.IconSizeSmall))
-			grid.Attach(entry, 2, i+1, 1, 1)
+			iconEntry, _ := gtk.EntryNew()
+			iconEntry.SetWidthChars(40)
+			iconEntry.SetText(d.Icon)
+			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, d.Icon, settings.Preferences.IconSizeSmall))
+			iconEntry.Connect("changed", func() {
+				s, _ := iconEntry.GetText()
+				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, s, settings.Preferences.IconSizeSmall))
+			})
+			grid.Attach(iconEntry, 2, i+1, 1, 1)
+
+			fcButton := setupFileChooserButton()
+			fcButton.Connect("file-set", func() {
+				iconEntry.SetText(fcButton.GetFilename())
+			})
+			grid.Attach(fcButton, 3, i+1, 1, 1)
+
+			cb, _ := gtk.CheckButtonNewWithLabel("Delete")
+			grid.Attach(cb, 4, i+1, 1, 1)
+
+			lastRow++
 		}
+	case *[]Button:
+		win.SetTitle("nwgcc: Edit User Buttons")
+		for i, d := range *definitions.(*[]Button) {
+			entry, _ := gtk.EntryNew()
+			entry.SetWidthChars(20)
+			entry.SetText(d.Name)
+			grid.Attach(entry, 0, i+1, 1, 1)
+
+			entry, _ = gtk.EntryNew()
+			entry.SetWidthChars(25)
+			entry.SetText(d.Command)
+			grid.Attach(entry, 1, i+1, 1, 1)
+
+			iconEntry, _ := gtk.EntryNew()
+			iconEntry.SetWidthChars(40)
+			iconEntry.SetText(d.Icon)
+			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, d.Icon, settings.Preferences.IconSizeSmall))
+			iconEntry.Connect("changed", func() {
+				s, _ := iconEntry.GetText()
+				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, s, settings.Preferences.IconSizeSmall))
+			})
+			grid.Attach(iconEntry, 2, i+1, 1, 1)
+
+			fcButton := setupFileChooserButton()
+			fcButton.Connect("file-set", func() {
+				iconEntry.SetText(fcButton.GetFilename())
+			})
+			grid.Attach(fcButton, 3, i+1, 1, 1)
+
+			cb, _ := gtk.CheckButtonNewWithLabel("Delete")
+			grid.Attach(cb, 4, i+1, 1, 1)
+
+			lastRow++
+		}
+	default:
+		break
 	}
+	entry, _ := gtk.EntryNew()
+	entry.SetWidthChars(20)
+	entry.SetPlaceholderText("Enter new label")
+	grid.Attach(entry, 0, lastRow+1, 1, 1)
+
+	entry, _ = gtk.EntryNew()
+	entry.SetWidthChars(25)
+	entry.SetPlaceholderText("Enter new command")
+	grid.Attach(entry, 1, lastRow+1, 1, 1)
+
+	iconEntry, _ := gtk.EntryNew()
+	iconEntry.SetWidthChars(40)
+	iconEntry.SetPlaceholderText("Enter name or choose a file")
+	iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, "", settings.Preferences.IconSizeSmall))
+	iconEntry.Connect("changed", func() {
+		s, _ := iconEntry.GetText()
+		iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, s, settings.Preferences.IconSizeSmall))
+	})
+	grid.Attach(iconEntry, 2, lastRow+1, 1, 1)
+
+	fcButton := setupFileChooserButton()
+	fcButton.Connect("file-set", func() {
+		iconEntry.SetText(fcButton.GetFilename())
+	})
+	grid.Attach(fcButton, 3, lastRow+1, 1, 1)
+
+	btn, _ := gtk.ButtonNew()
+	btn.SetLabel("Cancel")
+	btn.Connect("clicked", func() {
+		win.Close()
+	})
+	grid.Attach(btn, 3, lastRow+2, 1, 1)
+
+	btn, _ = gtk.ButtonNew()
+	btn.SetLabel("Apply")
+
+	switch definitions.(type) {
+	case *[]CustomRow:
+		btn.Connect("clicked", func() {
+			var cRows []CustomRow
+			var cRow CustomRow
+			for row := 1; row < lastRow+1; row++ {
+				field, _ := grid.GetChildAt(4, row)
+				delete := field.(*gtk.CheckButton).GetActive()
+				if !delete {
+					field, _ := grid.GetChildAt(0, row)
+					text, _ := field.(*gtk.Entry).GetText()
+					cRow.Name = text
+
+					field, _ = grid.GetChildAt(1, row)
+					text, _ = field.(*gtk.Entry).GetText()
+					cRow.Command = text
+
+					field, _ = grid.GetChildAt(2, row)
+					text, _ = field.(*gtk.Entry).GetText()
+					cRow.Icon = text
+
+					cRows = append(cRows, cRow)
+				}
+			}
+			// We only add a new row if at least name given
+			field, _ := grid.GetChildAt(0, lastRow+1)
+			text, _ := field.(*gtk.Entry).GetText()
+			if text != "" {
+				var newRow CustomRow
+				newRow.Name = text
+
+				field, _ = grid.GetChildAt(1, lastRow+1)
+				text, _ = field.(*gtk.Entry).GetText()
+				newRow.Command = text
+
+				field, _ = grid.GetChildAt(2, lastRow+1)
+				text, _ = field.(*gtk.Entry).GetText()
+				newRow.Icon = text
+
+				cRows = append(cRows, newRow)
+			}
+
+			config.CustomRows = cRows
+			configChanged = true
+			win.Close()
+		})
+	case *[]Button:
+		btn.Connect("clicked", func() {
+			var cBtns []Button
+			var cBtn Button
+			for row := 1; row < lastRow+1; row++ {
+				field, _ := grid.GetChildAt(4, row)
+				delete := field.(*gtk.CheckButton).GetActive()
+				if !delete {
+					field, _ := grid.GetChildAt(0, row)
+					text, _ := field.(*gtk.Entry).GetText()
+					cBtn.Name = text
+
+					field, _ = grid.GetChildAt(1, row)
+					text, _ = field.(*gtk.Entry).GetText()
+					cBtn.Command = text
+
+					field, _ = grid.GetChildAt(2, row)
+					text, _ = field.(*gtk.Entry).GetText()
+					cBtn.Icon = text
+
+					cBtns = append(cBtns, cBtn)
+				}
+			}
+			// We only add a new button if at least name given
+			field, _ := grid.GetChildAt(0, lastRow+1)
+			text, _ := field.(*gtk.Entry).GetText()
+			if text != "" {
+				var newBtn Button
+				newBtn.Name = text
+
+				field, _ = grid.GetChildAt(1, lastRow+1)
+				text, _ = field.(*gtk.Entry).GetText()
+				newBtn.Command = text
+
+				field, _ = grid.GetChildAt(2, lastRow+1)
+				text, _ = field.(*gtk.Entry).GetText()
+				newBtn.Icon = text
+
+				cBtns = append(cBtns, newBtn)
+			}
+
+			config.Buttons = cBtns
+			configChanged = true
+			win.Close()
+		})
+	}
+	grid.Attach(btn, 4, lastRow+2, 1, 1)
+
+	// Clear selection on 1st Entry
+	field, _ := grid.GetChildAt(0, 1)
+	field.(*gtk.Entry).SelectRegion(0, 0)
+
+	field, _ = grid.GetChildAt(0, lastRow+1)
+	field.(*gtk.Entry).GrabFocus()
 
 	win.Add(vbox)
 
 	win.ShowAll()
+}
+
+func setupFileChooserButton() *gtk.FileChooserButton {
+	fcBtn, _ := gtk.FileChooserButtonNew("Choose", gtk.FILE_CHOOSER_ACTION_OPEN)
+	filter, _ := gtk.FileFilterNew()
+	filter.AddPattern("*.svg")
+	filter.AddPattern("*.SVG")
+	filter.AddPattern("*.png")
+	filter.AddPattern("*.PNG")
+	fcBtn.AddFilter(filter)
+
+	return fcBtn
 }

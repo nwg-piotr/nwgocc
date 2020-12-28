@@ -30,7 +30,6 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 		iconPath = icon
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 		if err != nil {
-			fmt.Println(err)
 			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
 				"icons_light/icon-missing.svg"), size, size)
 			Check(err)
