@@ -163,6 +163,16 @@ func setupPreferencesWindow() {
 	})
 
 	// bottom Buttons
+	btnUserRows := getButtonFromBuilder(builder, "btn_user_rows")
+	btnUserRows.Connect("clicked", func() {
+		setupTemplateEditionWindow(&config.CustomRows)
+	})
+
+	btnUserButtons := getButtonFromBuilder(builder, "btn_user_buttons")
+	btnUserButtons.Connect("clicked", func() {
+		setupTemplateEditionWindow(&config.Buttons)
+	})
+
 	btnCancel := getButtonFromBuilder(builder, "btn_cancel")
 	btnCancel.Connect("clicked", func() {
 		prefWindow.Close()
@@ -320,6 +330,64 @@ func setupCmdDialog(command *string) {
 		win.Close()
 	})
 	hbox.PackStart(btnApply, false, false, 3)
+
+	win.ShowAll()
+}
+
+func setupTemplateEditionWindow(definitions interface{}) {
+	win, _ := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+
+	win.SetTransientFor(prefWindow)
+	win.SetModal(true)
+	win.SetKeepAbove(true)
+	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG)
+	win.SetProperty("name", "preferences")
+	win.Connect("key-release-event", handleEscape)
+
+	vbox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
+	hbox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	vbox.PackStart(hbox, true, true, 20)
+
+	grid, _ := gtk.GridNew()
+	grid.SetColumnSpacing(10)
+	grid.SetRowSpacing(10)
+	hbox.PackStart(grid, true, true, 20)
+
+	label, _ := gtk.LabelNew("Label")
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 0, 0, 1, 1)
+
+	label, _ = gtk.LabelNew("Command")
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 1, 0, 1, 1)
+
+	label, _ = gtk.LabelNew("Icon name or path")
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 2, 0, 1, 1)
+
+	switch definitions.(type) {
+	case *[]CustomRow:
+		win.SetTitle("nwgcc: Edit User Rows")
+		for i, d := range *definitions.(*[]CustomRow) {
+			entry, _ := gtk.EntryNew()
+			entry.SetWidthChars(20)
+			entry.SetText(d.Name)
+			grid.Attach(entry, 0, i+1, 1, 1)
+
+			entry, _ = gtk.EntryNew()
+			entry.SetWidthChars(25)
+			entry.SetText(d.Command)
+			grid.Attach(entry, 1, i+1, 1, 1)
+
+			entry, _ = gtk.EntryNew()
+			entry.SetWidthChars(40)
+			entry.SetText(d.Icon)
+			entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, d.Icon, settings.Preferences.IconSizeSmall))
+			grid.Attach(entry, 2, i+1, 1, 1)
+		}
+	}
+
+	win.Add(vbox)
 
 	win.ShowAll()
 }
