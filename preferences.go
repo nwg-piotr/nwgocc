@@ -610,16 +610,22 @@ func setupIconsEditionWindow() {
 	win.SetKeepAbove(true)
 	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG)
 	win.SetProperty("name", "preferences")
+	win.SetDefaultSize(300, 720)
 	win.Connect("key-release-event", handleEscape)
 
 	vbox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
 	hbox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 	vbox.PackStart(hbox, true, true, 10)
 
+	scrolledWindow, _ := gtk.ScrolledWindowNew(nil, nil)
+	scrolledWindow.SetPolicy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+
 	grid, _ := gtk.GridNew()
 	grid.SetColumnSpacing(10)
 	grid.SetRowSpacing(3)
-	hbox.PackStart(grid, true, true, 20)
+	scrolledWindow.Add(grid)
+	//hbox.PackStart(grid, true, true, 20)
+	hbox.PackStart(scrolledWindow, true, true, 20)
 
 	label, _ := gtk.LabelNew("Icon")
 	label.SetHAlign(gtk.ALIGN_START)
@@ -748,7 +754,7 @@ func setupIconsEditionWindow() {
 
 	hbox.PackEnd(btn, false, false, 20)
 	//grid.Attach(hbox, 0, 23, 3, 1)
-	vbox.PackStart(hbox, true, true, 10)
+	vbox.PackStart(hbox, false, true, 10)
 
 	// Clear selection on 1st Entry
 	field, _ := grid.GetChildAt(1, 1)
