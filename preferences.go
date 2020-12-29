@@ -173,6 +173,11 @@ func setupPreferencesWindow() {
 		setupTemplateEditionWindow(&config.Buttons)
 	})
 
+	btnIcons := getButtonFromBuilder(builder, "btn_icons")
+	btnIcons.Connect("clicked", func() {
+		setupIconsEditionWindow()
+	})
+
 	btnCancel := getButtonFromBuilder(builder, "btn_cancel")
 	btnCancel.Connect("clicked", func() {
 		prefWindow.Close()
@@ -595,4 +600,191 @@ func setupFileChooserButton() *gtk.FileChooserButton {
 	fcBtn.AddFilter(filter)
 
 	return fcBtn
+}
+
+func setupIconsEditionWindow() {
+	win, _ := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
+
+	win.SetTransientFor(prefWindow)
+	win.SetModal(true)
+	win.SetKeepAbove(true)
+	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG)
+	win.SetProperty("name", "preferences")
+	win.Connect("key-release-event", handleEscape)
+
+	vbox, _ := gtk.BoxNew(gtk.ORIENTATION_VERTICAL, 6)
+	hbox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+	vbox.PackStart(hbox, true, true, 10)
+
+	grid, _ := gtk.GridNew()
+	grid.SetColumnSpacing(10)
+	grid.SetRowSpacing(3)
+	hbox.PackStart(grid, true, true, 20)
+
+	label, _ := gtk.LabelNew("Icon")
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 0, 0, 1, 1)
+
+	label, _ = gtk.LabelNew("Name or path")
+	label.SetHAlign(gtk.ALIGN_START)
+	grid.Attach(label, 1, 0, 1, 1)
+
+	win.SetTitle("nwgcc: Edit Icons Dictionary")
+
+	lbl, entry, fcBtn := iconEditionFields("battery-empty", settings.Icons.BatteryEmpty)
+	grid.Attach(lbl, 0, 1, 1, 1)
+	grid.Attach(entry, 1, 1, 1, 1)
+	grid.Attach(fcBtn, 2, 1, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("battery-low", settings.Icons.BatteryLow)
+	grid.Attach(lbl, 0, 2, 1, 1)
+	grid.Attach(entry, 1, 2, 1, 1)
+	grid.Attach(fcBtn, 2, 2, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("battery-good", settings.Icons.BatteryGood)
+	grid.Attach(lbl, 0, 3, 1, 1)
+	grid.Attach(entry, 1, 3, 1, 1)
+	grid.Attach(fcBtn, 2, 3, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("battery-full", settings.Icons.BatteryFull)
+	grid.Attach(lbl, 0, 4, 1, 1)
+	grid.Attach(entry, 1, 4, 1, 1)
+	grid.Attach(fcBtn, 2, 4, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("user", settings.Icons.User)
+	grid.Attach(lbl, 0, 5, 1, 1)
+	grid.Attach(entry, 1, 5, 1, 1)
+	grid.Attach(fcBtn, 2, 5, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("wifi-on", settings.Icons.WifiOn)
+	grid.Attach(lbl, 0, 6, 1, 1)
+	grid.Attach(entry, 1, 6, 1, 1)
+	grid.Attach(fcBtn, 2, 6, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("wifi-off", settings.Icons.WifiOff)
+	grid.Attach(lbl, 0, 7, 1, 1)
+	grid.Attach(entry, 1, 7, 1, 1)
+	grid.Attach(fcBtn, 2, 7, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("brightness-low", settings.Icons.BrightnessLow)
+	grid.Attach(lbl, 0, 8, 1, 1)
+	grid.Attach(entry, 1, 8, 1, 1)
+	grid.Attach(fcBtn, 2, 8, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("brightness-medium", settings.Icons.BrightnessMedium)
+	grid.Attach(lbl, 0, 9, 1, 1)
+	grid.Attach(entry, 1, 9, 1, 1)
+	grid.Attach(fcBtn, 2, 9, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("brightness-high", settings.Icons.BrightnessHigh)
+	grid.Attach(lbl, 0, 10, 1, 1)
+	grid.Attach(entry, 1, 10, 1, 1)
+	grid.Attach(fcBtn, 2, 10, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("bt-on", settings.Icons.BtOn)
+	grid.Attach(lbl, 0, 11, 1, 1)
+	grid.Attach(entry, 1, 11, 1, 1)
+	grid.Attach(fcBtn, 2, 11, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("bt-off", settings.Icons.BtOff)
+	grid.Attach(lbl, 0, 12, 1, 1)
+	grid.Attach(entry, 1, 12, 1, 1)
+	grid.Attach(fcBtn, 2, 12, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("volume-low", settings.Icons.VolumeLow)
+	grid.Attach(lbl, 0, 13, 1, 1)
+	grid.Attach(entry, 1, 13, 1, 1)
+	grid.Attach(fcBtn, 2, 13, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("volume-medium", settings.Icons.VolumeMedium)
+	grid.Attach(lbl, 0, 14, 1, 1)
+	grid.Attach(entry, 1, 14, 1, 1)
+	grid.Attach(fcBtn, 2, 14, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("volume-high", settings.Icons.VolumeHigh)
+	grid.Attach(lbl, 0, 15, 1, 1)
+	grid.Attach(entry, 1, 15, 1, 1)
+	grid.Attach(fcBtn, 2, 15, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("volume-muted", settings.Icons.VolumeMuted)
+	grid.Attach(lbl, 0, 16, 1, 1)
+	grid.Attach(entry, 1, 16, 1, 1)
+	grid.Attach(fcBtn, 2, 16, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("media-playback-pause", settings.Icons.MediaPlaybackPause)
+	grid.Attach(lbl, 0, 17, 1, 1)
+	grid.Attach(entry, 1, 17, 1, 1)
+	grid.Attach(fcBtn, 2, 17, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("media-playback-start", settings.Icons.MediaPlaybackStart)
+	grid.Attach(lbl, 0, 18, 1, 1)
+	grid.Attach(entry, 1, 18, 1, 1)
+	grid.Attach(fcBtn, 2, 18, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("media-playback-stop", settings.Icons.MediaPlaybackStop)
+	grid.Attach(lbl, 0, 19, 1, 1)
+	grid.Attach(entry, 1, 19, 1, 1)
+	grid.Attach(fcBtn, 2, 19, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("media-skip-backward", settings.Icons.MediaSkipBackward)
+	grid.Attach(lbl, 0, 20, 1, 1)
+	grid.Attach(entry, 1, 20, 1, 1)
+	grid.Attach(fcBtn, 2, 20, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("media-skip-forward", settings.Icons.MediaSkipForward)
+	grid.Attach(lbl, 0, 21, 1, 1)
+	grid.Attach(entry, 1, 21, 1, 1)
+	grid.Attach(fcBtn, 2, 21, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("click-me", settings.Icons.ClickMe)
+	grid.Attach(lbl, 0, 22, 1, 1)
+	grid.Attach(entry, 1, 22, 1, 1)
+	grid.Attach(fcBtn, 2, 22, 1, 1)
+
+	hbox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
+
+	btn, _ := gtk.ButtonNew()
+	btn.SetLabel("Apply")
+
+	hbox.PackEnd(btn, false, false, 20)
+	//grid.Attach(hbox, 0, 23, 3, 1)
+	vbox.PackStart(hbox, true, true, 10)
+
+	// Clear selection on 1st Entry
+	field, _ := grid.GetChildAt(1, 1)
+	field.(*gtk.Entry).SelectRegion(0, 0)
+
+	btn, _ = gtk.ButtonNew()
+	btn.SetLabel("Cancel")
+	btn.Connect("clicked", func() {
+		win.Close()
+	})
+	hbox.PackEnd(btn, false, false, 0)
+
+	btn.GrabFocus()
+
+	win.Add(vbox)
+
+	win.ShowAll()
+}
+
+func iconEditionFields(name, value string) (*gtk.Label, *gtk.Entry, *gtk.FileChooserButton) {
+	label, _ := gtk.LabelNew(name)
+	label.SetHAlign(gtk.ALIGN_START)
+
+	entry, _ := gtk.EntryNew()
+	entry.SetWidthChars(40)
+	entry.SetText(value)
+	entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, value, settings.Preferences.IconSizeSmall))
+	entry.Connect("changed", func() {
+		s, _ := entry.GetText()
+		entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, s, settings.Preferences.IconSizeSmall))
+	})
+
+	button := setupFileChooserButton()
+	button.Connect("file-set", func() {
+		entry.SetText(button.GetFilename())
+	})
+
+	return label, entry, button
 }

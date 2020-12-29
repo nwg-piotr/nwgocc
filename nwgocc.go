@@ -507,15 +507,19 @@ func updateVolumeRow() {
 
 	volSlider.SetValue(float64(vol))
 
-	if GetCommandOutput("playerctl status /dev/null 2>&1") == "Playing" {
-		icon = settings.Icons.MediaPlaybackPause
-	} else {
-		icon = settings.Icons.MediaPlaybackStart
-	}
-	if icon != playIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
-		playImage.SetFromPixbuf(pixbuf)
-		playIcon = icon
+	if settings.Preferences.ShowPlayerctl {
+		if GetCommandOutput("playerctl status /dev/null 2>&1") == "Playing" {
+			icon = settings.Icons.MediaPlaybackPause
+		} else {
+			icon = settings.Icons.MediaPlaybackStart
+		}
+		if icon != playIcon {
+			pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+			if playImage != nil {
+				playImage.SetFromPixbuf(pixbuf)
+			}
+			playIcon = icon
+		}
 	}
 }
 

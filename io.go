@@ -91,8 +91,6 @@ type Icons struct {
 	MediaPlaybackPause string `json:"media-playback-pause"`
 	MediaPlaybackStart string `json:"media-playback-start"`
 	MediaPlaybackStop  string `json:"media-playback-stop"`
-	MediaSeekBackward  string `json:"media-seek-backward"`
-	MediaSeekForward   string `json:"media-seek-forward"`
 	MediaSkipBackward  string `json:"media-skip-backward"`
 	MediaSkipForward   string `json:"media-skip-forward"`
 	ClickMe            string `json:"click-me"`
