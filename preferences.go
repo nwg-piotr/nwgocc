@@ -400,10 +400,7 @@ func setupTemplateEditionWindow(definitions interface{}) {
 			})
 			grid.Attach(iconEntry, 2, i+1, 1, 1)
 
-			fcButton := setupFileChooserButton()
-			fcButton.Connect("file-set", func() {
-				iconEntry.SetText(fcButton.GetFilename())
-			})
+			fcButton := setupFCButton(iconEntry)
 			grid.Attach(fcButton, 3, i+1, 1, 1)
 
 			cb, _ := gtk.CheckButtonNewWithLabel("Delete")
@@ -434,10 +431,7 @@ func setupTemplateEditionWindow(definitions interface{}) {
 			})
 			grid.Attach(iconEntry, 2, i+1, 1, 1)
 
-			fcButton := setupFileChooserButton()
-			fcButton.Connect("file-set", func() {
-				iconEntry.SetText(fcButton.GetFilename())
-			})
+			fcButton := setupFCButton(iconEntry)
 			grid.Attach(fcButton, 3, i+1, 1, 1)
 
 			cb, _ := gtk.CheckButtonNewWithLabel("Delete")
@@ -468,10 +462,7 @@ func setupTemplateEditionWindow(definitions interface{}) {
 	})
 	grid.Attach(iconEntry, 2, lastRow+1, 1, 1)
 
-	fcButton := setupFileChooserButton()
-	fcButton.Connect("file-set", func() {
-		iconEntry.SetText(fcButton.GetFilename())
-	})
+	fcButton := setupFCButton(iconEntry)
 	grid.Attach(fcButton, 3, lastRow+1, 1, 1)
 
 	btn, _ := gtk.ButtonNew()
@@ -590,16 +581,31 @@ func setupTemplateEditionWindow(definitions interface{}) {
 	win.ShowAll()
 }
 
-func setupFileChooserButton() *gtk.FileChooserButton {
-	fcBtn, _ := gtk.FileChooserButtonNew("Choose", gtk.FILE_CHOOSER_ACTION_OPEN)
-	filter, _ := gtk.FileFilterNew()
-	filter.AddPattern("*.svg")
-	filter.AddPattern("*.SVG")
-	filter.AddPattern("*.png")
-	filter.AddPattern("*.PNG")
-	fcBtn.AddFilter(filter)
-
-	return fcBtn
+func setupFCButton(entry *gtk.Entry) *gtk.Button {
+	btn, _ := gtk.ButtonNew()
+	imgOpen, _ := gtk.ImageNewFromPixbuf(CreatePixbuf(iconsDir, "document-open-symbolic", settings.Preferences.IconSizeSmall))
+	btn.SetImage(imgOpen)
+	btn.Connect("clicked", func() {
+		dlg, _ := gtk.FileChooserDialogNewWith2Buttons(
+			"Choose an image", nil, gtk.FILE_CHOOSER_ACTION_OPEN,
+			"Open", gtk.RESPONSE_OK, "Cancel", gtk.RESPONSE_CANCEL,
+		)
+		dlg.SetDefaultResponse(gtk.RESPONSE_OK)
+		filter, _ := gtk.FileFilterNew()
+		filter.SetName("images")
+		filter.AddMimeType("image/png")
+		filter.AddMimeType("image/svg")
+		filter.AddPattern("*.png")
+		filter.AddPattern("*.svg")
+		dlg.SetFilter(filter)
+		response := dlg.Run()
+		if response == gtk.RESPONSE_OK {
+			filename := dlg.GetFilename()
+			entry.SetText(filename)
+		}
+		dlg.Destroy()
+	})
+	return btn
 }
 
 func setupIconsEditionWindow() {
@@ -624,7 +630,6 @@ func setupIconsEditionWindow() {
 	grid.SetColumnSpacing(10)
 	grid.SetRowSpacing(3)
 	scrolledWindow.Add(grid)
-	//hbox.PackStart(grid, true, true, 20)
 	hbox.PackStart(scrolledWindow, true, true, 20)
 
 	label, _ := gtk.LabelNew("Icon")
@@ -751,19 +756,47 @@ func setupIconsEditionWindow() {
 
 	btn, _ := gtk.ButtonNew()
 	btn.SetLabel("Apply")
+	btn.Connect("clicked", func() {
+
+		/*settings.Icons.BatteryEmpty = getTextFromGrid(grid, 1, 1)
+		settings.Icons.BatteryLow = getTextFromGrid(grid, 1, 2)
+		settings.Icons.BatteryGood = getTextFromGrid(grid, 1, 3)
+		settings.Icons.BatteryFull = getTextFromGrid(grid, 1, 4)
+		settings.Icons.User = getTextFromGrid(grid, 1, 5)
+		settings.Icons.WifiOn = getTextFromGrid(grid, 1, 6)
+		settings.Icons.WifiOff = getTextFromGrid(grid, 1, 7)
+		settings.Icons.BrightnessLow = getTextFromGrid(grid, 1, 8)
+		settings.Icons.BrightnessMedium = getTextFromGrid(grid, 1, 9)
+		settings.Icons.BrightnessHigh = getTextFromGrid(grid, 1, 10)
+		settings.Icons.BtOn = getTextFromGrid(grid, 1, 11)
+		settings.Icons.BtOff = getTextFromGrid(grid, 1, 12)
+		settings.Icons.VolumeLow = getTextFromGrid(grid, 1, 13)
+		settings.Icons.VolumeMedium = getTextFromGrid(grid, 1, 14)
+		settings.Icons.VolumeHigh = getTextFromGrid(grid, 1, 15)
+		settings.Icons.VolumeMuted = getTextFromGrid(grid, 1, 16)
+		settings.Icons.MediaPlaybackPause = getTextFromGrid(grid, 1, 17)
+		settings.Icons.MediaPlaybackStart = getTextFromGrid(grid, 1, 18)
+		settings.Icons.MediaPlaybackStop = getTextFromGrid(grid, 1, 19)
+		settings.Icons.MediaSkipBackward = getTextFromGrid(grid, 1, 20)
+		settings.Icons.MediaSkipForward = getTextFromGrid(grid, 1, 21)
+		settings.Icons.ClickMe = getTextFromGrid(grid, 1, 22)*/
+
+		go win.Close()
+	})
 
 	hbox.PackEnd(btn, false, false, 20)
-	//grid.Attach(hbox, 0, 23, 3, 1)
 	vbox.PackStart(hbox, false, true, 10)
 
 	// Clear selection on 1st Entry
-	field, _ := grid.GetChildAt(1, 1)
-	field.(*gtk.Entry).SelectRegion(0, 0)
+	field, err := grid.GetChildAt(1, 1)
+	if err == nil {
+		field.(*gtk.Entry).SelectRegion(0, 0)
+	}
 
 	btn, _ = gtk.ButtonNew()
 	btn.SetLabel("Cancel")
 	btn.Connect("clicked", func() {
-		win.Close()
+		defer win.Close()
 	})
 	hbox.PackEnd(btn, false, false, 0)
 
@@ -774,23 +807,38 @@ func setupIconsEditionWindow() {
 	win.ShowAll()
 }
 
-func iconEditionFields(name, value string) (*gtk.Label, *gtk.Entry, *gtk.FileChooserButton) {
-	label, _ := gtk.LabelNew(name)
+func getTextFromGrid(grid *gtk.Grid, col, row int) string {
+	text := ""
+	field, err := grid.GetChildAt(col, row)
+	if err == nil {
+		if entry, ok := field.(*gtk.Entry); ok {
+			text, _ = entry.GetText()
+		}
+	}
+	return text
+}
+
+func iconEditionFields(name, value string) (*gtk.Label, *gtk.Entry, *gtk.Button) {
+	label, err := gtk.LabelNew(name)
+	Check(err)
 	label.SetHAlign(gtk.ALIGN_START)
 
-	entry, _ := gtk.EntryNew()
+	entry, err := gtk.EntryNew()
+	Check(err)
 	entry.SetWidthChars(40)
 	entry.SetText(value)
 	entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, value, settings.Preferences.IconSizeSmall))
 	entry.Connect("changed", func() {
-		s, _ := entry.GetText()
+		s, err := entry.GetText()
+		Check(err)
 		entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(iconsDir, s, settings.Preferences.IconSizeSmall))
 	})
 
-	button := setupFileChooserButton()
-	button.Connect("file-set", func() {
-		entry.SetText(button.GetFilename())
-	})
+	button := setupFCButton(entry)
+
+	//button.Connect("file-set", func() {
+	//	entry.SetText(button.GetFilename())
+	//})
 
 	return label, entry, button
 }
