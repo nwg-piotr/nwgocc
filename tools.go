@@ -21,7 +21,7 @@ func Check(e error) {
 }
 
 // CreatePixbuf ...
-func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
+func CreatePixbuf(icon string, size int) *gdk.Pixbuf {
 	// full path given
 	iconPath := ""
 	if strings.HasPrefix(icon, "/") {

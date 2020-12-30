@@ -10,7 +10,7 @@
     "show_playerctl": false,
     "show_user_line": true,
     "show_wifi_line": true,
-    "show_bt_line": true,
+    "show_bt_line": false,
     "show_battery_line": true,
     "show_user_rows": true,
     "show_user_buttons": true,

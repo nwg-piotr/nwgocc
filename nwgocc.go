@@ -76,7 +76,7 @@ func setupUserRow() *gtk.EventBox {
 		hBox.SetProperty("name", "row-normal")
 	}
 
-	pixbuf := CreatePixbuf(iconsDir, settings.Icons.User, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(settings.Icons.User, settings.Preferences.IconSizeSmall)
 	image, err := gtk.ImageNewFromPixbuf(pixbuf)
 	Check(err)
 	hBox.PackStart(image, false, false, 2)
@@ -85,7 +85,7 @@ func setupUserRow() *gtk.EventBox {
 	hBox.PackStart(label, false, false, 2)
 
 	if settings.Preferences.OnClickUser != "" {
-		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
@@ -131,7 +131,7 @@ func setupWifiRow() *gtk.EventBox {
 	} else {
 		wifiText = "disconnected"
 	}
-	pixbuf := CreatePixbuf(iconsDir, wifiIcon, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(wifiIcon, settings.Preferences.IconSizeSmall)
 	wifiImage, _ = gtk.ImageNew()
 	wifiImage.SetFromPixbuf(pixbuf)
 	hBox.PackStart(wifiImage, false, false, 2)
@@ -141,7 +141,7 @@ func setupWifiRow() *gtk.EventBox {
 	hBox.PackStart(wifiLabel, false, false, 2)
 
 	if settings.Preferences.OnClickWifi != "" {
-		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
@@ -181,7 +181,7 @@ func updateWifiRow() {
 		icon = settings.Icons.WifiOff
 	}
 	if icon != wifiIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		wifiImage.SetFromPixbuf(pixbuf)
 		wifiIcon = icon
 	}
@@ -205,7 +205,7 @@ func setupBluetoothRow() *gtk.EventBox {
 		btIcon = settings.Icons.BtOff
 		status = "disabled"
 	}
-	pixbuf := CreatePixbuf(iconsDir, btIcon, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(btIcon, settings.Preferences.IconSizeSmall)
 	btImage, _ = gtk.ImageNew()
 	btImage.SetFromPixbuf(pixbuf)
 	hBox.PackStart(btImage, false, false, 2)
@@ -215,7 +215,7 @@ func setupBluetoothRow() *gtk.EventBox {
 	hBox.PackStart(btLabel, false, false, 2)
 
 	if settings.Preferences.OnClickBluetooth != "" {
-		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
@@ -255,7 +255,7 @@ func updateBluetoothRow() {
 		status = "disabled"
 	}
 	if icon != btIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		btImage.SetFromPixbuf(pixbuf)
 		btIcon = icon
 	}
@@ -289,7 +289,7 @@ func setupBatteryRow() *gtk.EventBox {
 		batIcon = settings.Icons.BatteryEmpty
 	}
 
-	pixbuf := CreatePixbuf(iconsDir, batIcon, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(batIcon, settings.Preferences.IconSizeSmall)
 	batImage, _ = gtk.ImageNew()
 	batImage.SetFromPixbuf(pixbuf)
 	hBox.PackStart(batImage, false, false, 2)
@@ -299,7 +299,7 @@ func setupBatteryRow() *gtk.EventBox {
 	hBox.PackStart(batLabel, false, false, 2)
 
 	if settings.Preferences.OnClickBattery != "" {
-		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
@@ -347,7 +347,7 @@ func updateBatteryRow() {
 	}
 
 	if icon != batIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		batImage, _ = gtk.ImageNew()
 		batImage.SetFromPixbuf(pixbuf)
 		batIcon = icon
@@ -368,7 +368,7 @@ func setupBrightnessRow() *gtk.Box {
 	default:
 		icon = settings.Icons.BrightnessLow
 	}
-	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 	briImage, _ = gtk.ImageNew()
 	briImage.SetFromPixbuf(pixbuf)
 	box.PackStart(briImage, false, false, 2)
@@ -397,7 +397,7 @@ func updateBrightnessRow() {
 		icon = settings.Icons.BrightnessLow
 	}
 	if icon != briIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		briImage.SetFromPixbuf(pixbuf)
 	}
 	briSlider.SetValue(bri)
@@ -422,7 +422,7 @@ func setupVolumeRow() *gtk.Box {
 		icon = settings.Icons.VolumeMuted
 	}
 
-	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+	pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 	volImage, _ = gtk.ImageNew()
 	volImage.SetFromPixbuf(pixbuf)
 	box.PackStart(volImage, false, false, 2)
@@ -439,7 +439,7 @@ func setupVolumeRow() *gtk.Box {
 
 	if settings.Preferences.ShowPlayerctl && isCommand(settings.Commands.Playerctl) {
 		icon := settings.Icons.MediaSkipBackward
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNew()
 		image.SetFromPixbuf(pixbuf)
 		eb, _ := gtk.EventBoxNew()
@@ -455,7 +455,7 @@ func setupVolumeRow() *gtk.Box {
 		} else {
 			icon = settings.Icons.MediaPlaybackStart
 		}
-		pixbuf = CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		playImage, _ = gtk.ImageNew()
 		playImage.SetFromPixbuf(pixbuf)
 		eb, _ = gtk.EventBoxNew()
@@ -467,7 +467,7 @@ func setupVolumeRow() *gtk.Box {
 		box.PackStart(eb, false, false, 0)
 
 		icon = settings.Icons.MediaSkipForward
-		pixbuf = CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		image, _ = gtk.ImageNew()
 		image.SetFromPixbuf(pixbuf)
 		eb, _ = gtk.EventBoxNew()
@@ -501,7 +501,7 @@ func updateVolumeRow() {
 	}
 
 	if icon != volIcon {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		volImage.SetFromPixbuf(pixbuf)
 	}
 
@@ -514,7 +514,7 @@ func updateVolumeRow() {
 			icon = settings.Icons.MediaPlaybackStart
 		}
 		if icon != playIcon {
-			pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+			pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 			if playImage != nil {
 				playImage.SetFromPixbuf(pixbuf)
 			}
@@ -532,7 +532,7 @@ func setupCustomRow(icon, name, cmd string) *gtk.EventBox {
 	}
 
 	if icon != "" {
-		pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNew()
 		image.SetFromPixbuf(pixbuf)
 		hBox.PackStart(image, false, false, 2)
@@ -545,7 +545,7 @@ func setupCustomRow(icon, name, cmd string) *gtk.EventBox {
 	}
 
 	if cmd != "" {
-		pixbuf := CreatePixbuf(iconsDir, settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		pixbuf := CreatePixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
 		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 		hBox.PackEnd(image, false, false, 2)
 
@@ -578,16 +578,12 @@ func setupPreferencesButton() *gtk.Button {
 	if settings.Preferences.CustomStyling {
 		button.SetProperty("name", "custom-button")
 	}
-	pixbuf := CreatePixbuf(iconsDir, "emblem-system-symbolic", settings.Preferences.IconSizeLarge)
+	pixbuf := CreatePixbuf("emblem-system-symbolic", settings.Preferences.IconSizeLarge)
 	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	button.SetImage(image)
 	button.SetAlwaysShowImage(true)
 	button.SetTooltipText("Preferences")
 	button.Connect("clicked", func() {
-		/* We are going to use the python version: nwgcc --settings, so the program must be terminated,
-		regardless of the user's preferences. Let's override them this single time */
-		//settings.Preferences.DontClose = false
-		//LaunchCommand("nwgcc -s")
 		setupPreferencesWindow()
 	})
 
@@ -599,7 +595,7 @@ func setupCustomButton(icon, name, cmd string) *gtk.Button {
 	if settings.Preferences.CustomStyling {
 		button.SetProperty("name", "custom-button")
 	}
-	pixbuf := CreatePixbuf(iconsDir, icon, settings.Preferences.IconSizeLarge)
+	pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeLarge)
 	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	button.SetImage(image)
 	button.SetAlwaysShowImage(true)
@@ -630,7 +626,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Load Preferences, Icons and Commands from ~/.local/share/nwgcc/preferences.json
+	setupDirs()
+
+	// Load Preferences, Icons and Commands from ~/.local/share/nwgocc/preferences.json
 	settings, _ = LoadSettings()
 
 	if *debug {
@@ -670,7 +668,7 @@ func main() {
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
 	Check(err)
 
-	win.SetTitle("nwgcc: Control Center")
+	win.SetTitle("nwgocc: Control Center")
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
 	if *winPosPointer {
