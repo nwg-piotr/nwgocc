@@ -6,7 +6,7 @@ css style sheets.
 
 Main window, Nordic-bluish-accent GTK theme, icons Custom light:
 
-![Main window](https://scrot.cloud/images/2020/12/31/main_window.png)
+![Main window](https://scrot.cloud/images/2020/12/31/main_window-1.png)
 
 [More screenshots](https://scrot.cloud/album/nwgocc.tDg)
 
