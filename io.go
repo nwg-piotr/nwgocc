@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -13,14 +14,92 @@ import (
 // ConfigDir returns the .config dir path
 func ConfigDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
-		return (fmt.Sprintf("%s/nwgcc", os.Getenv("XDG_CONFIG_HOME")))
+		return (fmt.Sprintf("%s/nwgocc", os.Getenv("XDG_CONFIG_HOME")))
 	}
-	return (fmt.Sprintf("%s/.config/nwgcc", os.Getenv("HOME")))
+	return (fmt.Sprintf("%s/.config/nwgocc", os.Getenv("HOME")))
 }
 
 // DataDir returns data directory path
 func DataDir() string {
-	return (fmt.Sprintf("%s/.local/share/nwgcc", os.Getenv("HOME")))
+	return (fmt.Sprintf("%s/.local/share/nwgocc", os.Getenv("HOME")))
+}
+
+func setupDirs() {
+	cDir := ConfigDir()
+	dDir := DataDir()
+	iconsLightDir := fmt.Sprintf("%s/icons_light", dDir)
+	iconsDarkDir := fmt.Sprintf("%s/icons_dark", dDir)
+
+	// Create config dir if not found (contains CLI commands, templates, CSS)
+	createDir(cDir)
+	// copy files if not found
+	copyFile("/usr/share/nwgocc/cli_commands", fmt.Sprintf("%s/cli_commands", cDir))
+	copyFile("/usr/share/nwgocc/config.json", fmt.Sprintf("%s/config.json", cDir))
+	copyFile("/usr/share/nwgocc/style.css", fmt.Sprintf("%s/style.css", cDir))
+
+	// Create data dir if not found (contains icons_light/, icons_dark/, preferences.json)
+	createDir(dDir)
+	copyFile("/usr/share/nwgocc/preferences.json", fmt.Sprintf("%s/preferences.json", dDir))
+
+	createDir(iconsLightDir)
+
+	// Copy missing icons
+	files, err := ioutil.ReadDir("/usr/share/nwgocc/icons_light")
+	Check(err)
+	for _, file := range files {
+		copyFile(fmt.Sprintf("/usr/share/nwgocc/icons_light/%s", file.Name()), fmt.Sprintf("%s/%s", iconsLightDir, file.Name()))
+	}
+
+	createDir(iconsDarkDir)
+
+	files, err = ioutil.ReadDir("/usr/share/nwgocc/icons_dark")
+	Check(err)
+	for _, file := range files {
+		copyFile(fmt.Sprintf("/usr/share/nwgocc/icons_dark/%s", file.Name()), fmt.Sprintf("%s/%s", iconsDarkDir, file.Name()))
+	}
+}
+
+// Create dir if it doesn't exist
+func createDir(dir string) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err := os.MkdirAll(dir, os.ModePerm)
+		Check(err)
+		if err == nil {
+			fmt.Println("Creating dir:", dir)
+		}
+	}
+}
+
+func copyFile(src, dst string) error {
+	if !*restoreDefaults {
+		if _, err := os.Stat(dst); !os.IsNotExist(err) {
+			return err
+		}
+	}
+	fmt.Println("Copying file:", dst)
+
+	var err error
+	var srcfd *os.File
+	var dstfd *os.File
+	var srcinfo os.FileInfo
+
+	if srcfd, err = os.Open(src); err != nil {
+		return err
+	}
+	defer srcfd.Close()
+
+	if dstfd, err = os.Create(dst); err != nil {
+		return err
+	}
+	defer dstfd.Close()
+
+	if _, err = io.Copy(dstfd, srcfd); err != nil {
+		return err
+	}
+	if srcinfo, err = os.Stat(src); err != nil {
+		return err
+	}
+	return os.Chmod(dst, srcinfo.Mode())
 }
 
 // CustomRow contains fields of a single user-defined row
@@ -91,8 +170,6 @@ type Icons struct {
 	MediaPlaybackPause string `json:"media-playback-pause"`
 	MediaPlaybackStart string `json:"media-playback-start"`
 	MediaPlaybackStop  string `json:"media-playback-stop"`
-	MediaSeekBackward  string `json:"media-seek-backward"`
-	MediaSeekForward   string `json:"media-seek-forward"`
 	MediaSkipBackward  string `json:"media-skip-backward"`
 	MediaSkipForward   string `json:"media-skip-forward"`
 	ClickMe            string `json:"click-me"`
@@ -140,8 +217,9 @@ func LoadConfig() (Configuration, error) {
 }
 
 // SaveConfig saves current Configuration to a json file
-func SaveConfig(c Configuration, path string) error {
-	bytes, err := json.MarshalIndent(c, "", "  ")
+func SaveConfig() error {
+	path := fmt.Sprintf("%s/config.json", ConfigDir())
+	bytes, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
 	}
@@ -166,6 +244,17 @@ func LoadSettings() (Settings, error) {
 	return s, nil
 }
 
+// SaveSettings saves current settings to a json file
+func SaveSettings() error {
+	path := fmt.Sprintf("%s/preferences.json", DataDir())
+	bytes, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(path, bytes, 0644)
+}
+
 // LoadCliCommands parses the cli_commands txt file and returns shell commands as []string slice
 func LoadCliCommands() []string {
 	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
@@ -181,6 +270,13 @@ func LoadCliCommands() []string {
 		}
 	}
 	return output
+}
+
+func saveCliFile(s string) {
+	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
+	b := []byte(s)
+	err := ioutil.WriteFile(path, b, 0644)
+	Check(err)
 }
 
 // GetCliOutput returns output of each command as a string, separated with new lines, ready for use in cliLabel
@@ -246,7 +342,7 @@ func isCommand(command string) bool {
 
 func btServiceEnabled() bool {
 	if isCommand(settings.Commands.Systemctl) {
-		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled"
+		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled" && GetCommandOutput("systemctl is-active bluetooth.service") == "active"
 	}
 	return false
 }

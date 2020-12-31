@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os/exec"
 	"path/filepath"
@@ -17,20 +16,18 @@ import (
 // Check ...
 func Check(e error) {
 	if e != nil {
-		log.Println(e)
 		panic(e)
 	}
 }
 
 // CreatePixbuf ...
-func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
+func CreatePixbuf(icon string, size int) *gdk.Pixbuf {
 	// full path given
 	iconPath := ""
 	if strings.HasPrefix(icon, "/") {
 		iconPath = icon
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 		if err != nil {
-			fmt.Println(err)
 			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
 				"icons_light/icon-missing.svg"), size, size)
 			Check(err)
@@ -40,8 +37,10 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 
 	// gtk icons in use - just name given
 	if iconsDir == "" {
-		iconTheme, _ := gtk.IconThemeGetDefault()
-		pixbuf, _ := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+		iconTheme, err := gtk.IconThemeGetDefault()
+		Check(err)
+		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+		Check(err)
 
 		return pixbuf
 	}
@@ -50,16 +49,16 @@ func CreatePixbuf(iconsDir, icon string, size int) *gdk.Pixbuf {
 	iconPath = filepath.Join(iconsDir, fmt.Sprintf("%s.svg", icon))
 	pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 	if err != nil {
-		iconTheme, _ := gtk.IconThemeGetDefault()
-		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
+		iconTheme, err := gtk.IconThemeGetDefault()
+		Check(err)
 
+		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
 		if err != nil {
 			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
 				"icons_light/icon-missing.svg"), size, size)
 			Check(err)
 		}
 		return pixbuf
-
 	}
 	return pixbuf
 }
