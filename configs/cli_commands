@@ -1,2 +1,1 @@
-# Example line, will print 'Linux <kernel-release>'
-a=$(uname -s ; uname -r) ; echo $a
+uname -rs

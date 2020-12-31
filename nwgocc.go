@@ -14,7 +14,7 @@ import (
 	"github.com/itchyny/volume-go"
 )
 
-var version = "0.0.1"
+var version = "0.1.0"
 
 var (
 	cliCommands []string
@@ -27,6 +27,7 @@ var customCSS = flag.String("css", "style.css", "custom css file name")
 var debug = flag.Bool("d", false, "do checks, print results")
 var displayVersion = flag.Bool("v", false, "display version information")
 var winPosPointer = flag.Bool("p", false, "place window at the mouse pointer position (Xorg only)")
+var restoreDefaults = flag.Bool("r", false, "restore defaults (preferences, templates and icons)")
 
 // These values need updates
 var (
@@ -654,7 +655,7 @@ func main() {
 
 	if settings.Preferences.CustomStyling {
 		css := filepath.Join(ConfigDir(), *customCSS)
-		fmt.Printf("Style: %s\n", css)
+		fmt.Printf("Style: '%s'\n", css)
 		cssProvider, err := gtk.CssProviderNew()
 		Check(err)
 		err = cssProvider.LoadFromPath(css)
@@ -663,6 +664,8 @@ func main() {
 		}
 		screen, _ := gdk.ScreenGetDefault()
 		gtk.AddProviderForScreen(screen, cssProvider, gtk.STYLE_PROVIDER_PRIORITY_USER)
+	} else {
+		fmt.Println("Style: GTK")
 	}
 
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)

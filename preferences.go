@@ -769,7 +769,7 @@ func setupIconsEditionWindow() {
 	btn.SetLabel("Apply")
 	btn.Connect("clicked", func() {
 
-		/*settings.Icons.BatteryEmpty = getTextFromGrid(grid, 1, 1)
+		settings.Icons.BatteryEmpty = getTextFromGrid(grid, 1, 1)
 		settings.Icons.BatteryLow = getTextFromGrid(grid, 1, 2)
 		settings.Icons.BatteryGood = getTextFromGrid(grid, 1, 3)
 		settings.Icons.BatteryFull = getTextFromGrid(grid, 1, 4)
@@ -790,9 +790,9 @@ func setupIconsEditionWindow() {
 		settings.Icons.MediaPlaybackStop = getTextFromGrid(grid, 1, 19)
 		settings.Icons.MediaSkipBackward = getTextFromGrid(grid, 1, 20)
 		settings.Icons.MediaSkipForward = getTextFromGrid(grid, 1, 21)
-		settings.Icons.ClickMe = getTextFromGrid(grid, 1, 22)*/
+		settings.Icons.ClickMe = getTextFromGrid(grid, 1, 22)
 
-		go win.Close()
+		win.Close()
 	})
 
 	hbox.PackEnd(btn, false, false, 20)

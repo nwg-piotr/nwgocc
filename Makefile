@@ -21,5 +21,3 @@ uninstall:
 
 run:
 	go run *.go
-
-all: get build install

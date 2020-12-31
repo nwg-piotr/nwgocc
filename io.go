@@ -71,8 +71,10 @@ func createDir(dir string) {
 }
 
 func copyFile(src, dst string) error {
-	if _, err := os.Stat(dst); !os.IsNotExist(err) {
-		return err
+	if !*restoreDefaults {
+		if _, err := os.Stat(dst); !os.IsNotExist(err) {
+			return err
+		}
 	}
 	fmt.Println("Copying file:", dst)
 
