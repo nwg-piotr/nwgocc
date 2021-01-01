@@ -440,7 +440,6 @@ func setupVolumeRow() *gtk.Box {
 
 	if settings.Preferences.ShowPlayerctl && isCommand(settings.Commands.Playerctl) {
 		playerctlStatus := GetCommandOutput("playerctl status /dev/null 2>&1")
-		fmt.Println(playerctlStatus)
 		if playerctlStatus == "Playing" || playerctlStatus == "Paused" {
 			icon := settings.Icons.MediaSkipBackward
 			pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
