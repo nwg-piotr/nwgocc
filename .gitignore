@@ -16,3 +16,6 @@
 
 # glade backups
 *.glade~
+
+# binary
+nwgocc

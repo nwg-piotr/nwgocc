@@ -439,45 +439,49 @@ func setupVolumeRow() *gtk.Box {
 	box.PackStart(volSlider, true, true, 2)
 
 	if settings.Preferences.ShowPlayerctl && isCommand(settings.Commands.Playerctl) {
-		icon := settings.Icons.MediaSkipBackward
-		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
-		image, _ := gtk.ImageNew()
-		image.SetFromPixbuf(pixbuf)
-		eb, _ := gtk.EventBoxNew()
-		eb.Connect("button-press-event", func() {
-			cmd := exec.Command("playerctl", "previous")
-			cmd.Run()
-		})
-		eb.Add(image)
-		box.PackStart(eb, false, false, 0)
+		playerctlStatus := GetCommandOutput("playerctl status /dev/null 2>&1")
+		fmt.Println(playerctlStatus)
+		if playerctlStatus == "Playing" || playerctlStatus == "Paused" {
+			icon := settings.Icons.MediaSkipBackward
+			pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
+			image, _ := gtk.ImageNew()
+			image.SetFromPixbuf(pixbuf)
+			eb, _ := gtk.EventBoxNew()
+			eb.Connect("button-press-event", func() {
+				cmd := exec.Command("playerctl", "previous")
+				cmd.Run()
+			})
+			eb.Add(image)
+			box.PackStart(eb, false, false, 0)
 
-		if GetCommandOutput("playerctl status /dev/null 2>&1") == "Playing" {
-			icon = settings.Icons.MediaPlaybackPause
-		} else {
-			icon = settings.Icons.MediaPlaybackStart
+			if playerctlStatus == "Playing" {
+				icon = settings.Icons.MediaPlaybackPause
+			} else {
+				icon = settings.Icons.MediaPlaybackStart
+			}
+			pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
+			playImage, _ = gtk.ImageNew()
+			playImage.SetFromPixbuf(pixbuf)
+			eb, _ = gtk.EventBoxNew()
+			eb.Connect("button-press-event", func() {
+				cmd := exec.Command("playerctl", "play-pause")
+				cmd.Run()
+			})
+			eb.Add(playImage)
+			box.PackStart(eb, false, false, 0)
+
+			icon = settings.Icons.MediaSkipForward
+			pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
+			image, _ = gtk.ImageNew()
+			image.SetFromPixbuf(pixbuf)
+			eb, _ = gtk.EventBoxNew()
+			eb.Connect("button-press-event", func() {
+				cmd := exec.Command("playerctl", "next")
+				cmd.Run()
+			})
+			eb.Add(image)
+			box.PackStart(eb, false, false, 0)
 		}
-		pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
-		playImage, _ = gtk.ImageNew()
-		playImage.SetFromPixbuf(pixbuf)
-		eb, _ = gtk.EventBoxNew()
-		eb.Connect("button-press-event", func() {
-			cmd := exec.Command("playerctl", "play-pause")
-			cmd.Run()
-		})
-		eb.Add(playImage)
-		box.PackStart(eb, false, false, 0)
-
-		icon = settings.Icons.MediaSkipForward
-		pixbuf = CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
-		image, _ = gtk.ImageNew()
-		image.SetFromPixbuf(pixbuf)
-		eb, _ = gtk.EventBoxNew()
-		eb.Connect("button-press-event", func() {
-			cmd := exec.Command("playerctl", "next")
-			cmd.Run()
-		})
-		eb.Add(image)
-		box.PackStart(eb, false, false, 0)
 	}
 
 	return box
