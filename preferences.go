@@ -17,16 +17,16 @@ var cliTextView *gtk.TextView
 
 func setupPreferencesWindow() {
 	builder, err := gtk.BuilderNewFromFile("/usr/share/nwgocc/preferences.glade")
-	Check(err)
+	check(err)
 
 	obj, err := builder.GetObject("preferences_window")
-	Check(err)
+	check(err)
 
 	if settings.Preferences.CustomStyling {
-		css := filepath.Join(ConfigDir(), *customCSS)
+		css := filepath.Join(configDir(), *customCSS)
 		fmt.Printf("Style: %s\n", css)
 		cssProvider, err := gtk.CssProviderNew()
-		Check(err)
+		check(err)
 		err = cssProvider.LoadFromPath(css)
 		if err != nil {
 			fmt.Println(err)
@@ -36,7 +36,7 @@ func setupPreferencesWindow() {
 	}
 
 	prefWindow, err := isWindow(obj)
-	Check(err)
+	check(err)
 
 	// TextView to edit CLI Label command(s)
 	cliTextView = setUpCliTextView(builder, "cli_textview")
@@ -186,11 +186,11 @@ func setupPreferencesWindow() {
 	btnApply := getButtonFromBuilder(builder, "btn_apply")
 	btnApply.Connect("clicked", func() {
 		saveCliCommands()
-		err := SaveSettings()
-		Check(err)
+		err := saveSettings()
+		check(err)
 		if configChanged {
-			err := SaveConfig()
-			Check(err)
+			err := saveConfig()
+			check(err)
 		}
 		gtk.MainQuit()
 	})
@@ -241,9 +241,9 @@ func setButtonImage(builder *gtk.Builder, id string, icon string) *gtk.Button {
 		return nil
 	}
 	if btn, ok := obj.(*gtk.Button); ok {
-		pixbuf := CreatePixbuf(icon, settings.Preferences.IconSizeSmall)
+		pixbuf := createPixbuf(icon, settings.Preferences.IconSizeSmall)
 		image, err := gtk.ImageNewFromPixbuf(pixbuf)
-		Check(err)
+		check(err)
 		btn.SetImage(image)
 		return btn
 	}
@@ -298,7 +298,7 @@ func handleEscape(window *gtk.Window, event *gdk.Event) {
 
 func saveCliCommands() {
 	buffer, err := cliTextView.GetBuffer()
-	Check(err)
+	check(err)
 	start := buffer.GetStartIter()
 	end := buffer.GetEndIter()
 	s, _ := buffer.GetText(start, end, true)
@@ -307,7 +307,7 @@ func saveCliCommands() {
 
 func setupCmdDialog(command *string) {
 	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
-	Check(err)
+	check(err)
 
 	win.SetTransientFor(prefWindow)
 	win.SetModal(true)
@@ -398,10 +398,10 @@ func setupTemplateEditionWindow(definitions interface{}) {
 			iconEntry.SetProperty("name", "edit-field")
 			iconEntry.SetWidthChars(40)
 			iconEntry.SetText(d.Icon)
-			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(d.Icon, settings.Preferences.IconSizeSmall))
+			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(d.Icon, settings.Preferences.IconSizeSmall))
 			iconEntry.Connect("changed", func() {
 				s, _ := iconEntry.GetText()
-				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(s, settings.Preferences.IconSizeSmall))
+				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(s, settings.Preferences.IconSizeSmall))
 			})
 			grid.Attach(iconEntry, 2, i+1, 1, 1)
 
@@ -432,10 +432,10 @@ func setupTemplateEditionWindow(definitions interface{}) {
 			iconEntry.SetProperty("name", "edit-field")
 			iconEntry.SetWidthChars(40)
 			iconEntry.SetText(d.Icon)
-			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(d.Icon, settings.Preferences.IconSizeSmall))
+			iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(d.Icon, settings.Preferences.IconSizeSmall))
 			iconEntry.Connect("changed", func() {
 				s, _ := iconEntry.GetText()
-				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(s, settings.Preferences.IconSizeSmall))
+				iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(s, settings.Preferences.IconSizeSmall))
 			})
 			grid.Attach(iconEntry, 2, i+1, 1, 1)
 
@@ -466,10 +466,10 @@ func setupTemplateEditionWindow(definitions interface{}) {
 	iconEntry.SetProperty("name", "edit-field")
 	iconEntry.SetWidthChars(40)
 	iconEntry.SetPlaceholderText("Enter name or choose a file")
-	iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf("", settings.Preferences.IconSizeSmall))
+	iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf("", settings.Preferences.IconSizeSmall))
 	iconEntry.Connect("changed", func() {
 		s, _ := iconEntry.GetText()
-		iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(s, settings.Preferences.IconSizeSmall))
+		iconEntry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(s, settings.Preferences.IconSizeSmall))
 	})
 	grid.Attach(iconEntry, 2, lastRow+1, 1, 1)
 
@@ -594,7 +594,7 @@ func setupTemplateEditionWindow(definitions interface{}) {
 
 func setupFCButton(entry *gtk.Entry) *gtk.Button {
 	btn, _ := gtk.ButtonNew()
-	imgOpen, _ := gtk.ImageNewFromPixbuf(CreatePixbuf("document-open-symbolic", settings.Preferences.IconSizeSmall))
+	imgOpen, _ := gtk.ImageNewFromPixbuf(createPixbuf("document-open-symbolic", settings.Preferences.IconSizeSmall))
 	btn.SetImage(imgOpen)
 	btn.Connect("clicked", func() {
 		dlg, _ := gtk.FileChooserDialogNewWith2Buttons(
@@ -831,19 +831,19 @@ func getTextFromGrid(grid *gtk.Grid, col, row int) string {
 
 func iconEditionFields(name, value string) (*gtk.Label, *gtk.Entry, *gtk.Button) {
 	label, err := gtk.LabelNew(name)
-	Check(err)
+	check(err)
 	label.SetHAlign(gtk.ALIGN_START)
 
 	entry, err := gtk.EntryNew()
-	Check(err)
+	check(err)
 	entry.SetProperty("name", "edit-field")
 	entry.SetWidthChars(40)
 	entry.SetText(value)
-	entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(value, settings.Preferences.IconSizeSmall))
+	entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(value, settings.Preferences.IconSizeSmall))
 	entry.Connect("changed", func() {
 		s, err := entry.GetText()
-		Check(err)
-		entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, CreatePixbuf(s, settings.Preferences.IconSizeSmall))
+		check(err)
+		entry.SetIconFromPixbuf(gtk.ENTRY_ICON_PRIMARY, createPixbuf(s, settings.Preferences.IconSizeSmall))
 	})
 
 	button := setupFCButton(entry)
