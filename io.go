@@ -11,22 +11,20 @@ import (
 	"strings"
 )
 
-// ConfigDir returns the .config dir path
-func ConfigDir() string {
+func configDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		return (fmt.Sprintf("%s/nwgocc", os.Getenv("XDG_CONFIG_HOME")))
 	}
 	return (fmt.Sprintf("%s/.config/nwgocc", os.Getenv("HOME")))
 }
 
-// DataDir returns data directory path
-func DataDir() string {
+func dataDir() string {
 	return (fmt.Sprintf("%s/.local/share/nwgocc", os.Getenv("HOME")))
 }
 
 func setupDirs() {
-	cDir := ConfigDir()
-	dDir := DataDir()
+	cDir := configDir()
+	dDir := dataDir()
 	iconsLightDir := fmt.Sprintf("%s/icons_light", dDir)
 	iconsDarkDir := fmt.Sprintf("%s/icons_dark", dDir)
 
@@ -45,7 +43,7 @@ func setupDirs() {
 
 	// Copy missing icons
 	files, err := ioutil.ReadDir("/usr/share/nwgocc/icons_light")
-	Check(err)
+	check(err)
 	for _, file := range files {
 		copyFile(fmt.Sprintf("/usr/share/nwgocc/icons_light/%s", file.Name()), fmt.Sprintf("%s/%s", iconsLightDir, file.Name()))
 	}
@@ -53,7 +51,7 @@ func setupDirs() {
 	createDir(iconsDarkDir)
 
 	files, err = ioutil.ReadDir("/usr/share/nwgocc/icons_dark")
-	Check(err)
+	check(err)
 	for _, file := range files {
 		copyFile(fmt.Sprintf("/usr/share/nwgocc/icons_dark/%s", file.Name()), fmt.Sprintf("%s/%s", iconsDarkDir, file.Name()))
 	}
@@ -63,7 +61,7 @@ func setupDirs() {
 func createDir(dir string) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		err := os.MkdirAll(dir, os.ModePerm)
-		Check(err)
+		check(err)
 		if err == nil {
 			fmt.Println("Creating dir:", dir)
 		}
@@ -185,9 +183,7 @@ type Commands struct {
 	GetHost            string `json:"get_host"`
 	GetSsid            string `json:"get_ssid"`
 	GetUser            string `json:"get_user"`
-	GetVolumeAlt       string `json:"get_volume_alt"`
 	SetBrightness      string `json:"set_brightness"`
-	SetVolumeAlt       string `json:"set_volume_alt"`
 	Systemctl          string `json:"systemctl"`
 	Playerctl          string `json:"playerctl"`
 }
@@ -199,9 +195,9 @@ type Settings struct {
 	Commands    Commands    `json:"commands"`
 }
 
-// LoadConfig parses the config.json file and returns Configuration instance
-func LoadConfig() (Configuration, error) {
-	path := fmt.Sprintf("%s/config.json", ConfigDir())
+// Parses the config.json file and returns Configuration instance
+func loadConfig() (Configuration, error) {
+	path := fmt.Sprintf("%s/config.json", configDir())
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return Configuration{}, err
@@ -216,9 +212,9 @@ func LoadConfig() (Configuration, error) {
 	return c, nil
 }
 
-// SaveConfig saves current Configuration to a json file
-func SaveConfig() error {
-	path := fmt.Sprintf("%s/config.json", ConfigDir())
+// Saves current Configuration to a json file
+func saveConfig() error {
+	path := fmt.Sprintf("%s/config.json", configDir())
 	bytes, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err
@@ -227,9 +223,9 @@ func SaveConfig() error {
 	return ioutil.WriteFile(path, bytes, 0644)
 }
 
-// LoadSettings parses the preferences.json file and returns Settings instance
-func LoadSettings() (Settings, error) {
-	path := fmt.Sprintf("%s/preferences.json", DataDir())
+// Parses the preferences.json file and returns Settings instance
+func loadSettings() (Settings, error) {
+	path := fmt.Sprintf("%s/preferences.json", dataDir())
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return Settings{}, err
@@ -244,9 +240,9 @@ func LoadSettings() (Settings, error) {
 	return s, nil
 }
 
-// SaveSettings saves current settings to a json file
-func SaveSettings() error {
-	path := fmt.Sprintf("%s/preferences.json", DataDir())
+// Saves current settings to a json file
+func saveSettings() error {
+	path := fmt.Sprintf("%s/preferences.json", dataDir())
 	bytes, err := json.MarshalIndent(settings, "", "  ")
 	if err != nil {
 		return err
@@ -255,11 +251,11 @@ func SaveSettings() error {
 	return ioutil.WriteFile(path, bytes, 0644)
 }
 
-// LoadCliCommands parses the cli_commands txt file and returns shell commands as []string slice
-func LoadCliCommands() []string {
-	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
+// Parses the cli_commands txt file and returns shell commands as []string slice
+func loadCliCommands() []string {
+	path := fmt.Sprintf("%s/cli_commands", configDir())
 	bytes, err := ioutil.ReadFile(path)
-	Check(err)
+	check(err)
 	lines := strings.Split(string(bytes), "\n")
 	// trim whitespaces, remove commented out and empty lines
 	var output []string
@@ -273,14 +269,14 @@ func LoadCliCommands() []string {
 }
 
 func saveCliFile(s string) {
-	path := fmt.Sprintf("%s/cli_commands", ConfigDir())
+	path := fmt.Sprintf("%s/cli_commands", configDir())
 	b := []byte(s)
 	err := ioutil.WriteFile(path, b, 0644)
-	Check(err)
+	check(err)
 }
 
-// GetCliOutput returns output of each command as a string, separated with new lines, ready for use in cliLabel
-func GetCliOutput(commands []string) string {
+// Returns output of each command as a string, separated with new lines, ready for use in cliLabel
+func getCliOutput(commands []string) string {
 	var output []string
 	for _, command := range commands {
 		out, err := exec.Command("sh", "-c", command).Output()
@@ -300,8 +296,8 @@ func GetCliOutput(commands []string) string {
 	return string(strings.Join(output, "\n"))
 }
 
-// GetCommandOutput returns output of a CLI command with optional arguments
-func GetCommandOutput(command string) string {
+// Returns output of a CLI command with optional arguments
+func getCommandOutput(command string) string {
 	out, err := exec.Command("sh", "-c", command).Output()
 	if err != nil {
 		return ""
@@ -310,8 +306,8 @@ func GetCommandOutput(command string) string {
 	return strings.TrimSpace(string(out))
 }
 
-// CheckCommands checks external commands availability
-func CheckCommands(commands Commands) {
+// Checks external commands availability
+func checkCommands(commands Commands) {
 	fmt.Println("Checking commands availability:")
 	v := reflect.ValueOf(commands)
 	values := make([]interface{}, v.NumField())
@@ -321,8 +317,8 @@ func CheckCommands(commands Commands) {
 		values[i] = v.Field(i).Interface()
 		cmd, _ := values[i].(string)
 		cmd = strings.Split(cmd, " ")[0]
-		available := GetCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
-		if !KeyFound(m, cmd) {
+		available := getCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
+		if !keyFound(m, cmd) {
 			if available {
 				m[cmd] = "available"
 			} else {
@@ -337,12 +333,14 @@ func CheckCommands(commands Commands) {
 
 func isCommand(command string) bool {
 	cmd := strings.Fields(command)[0]
-	return GetCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
+	return getCommandOutput(fmt.Sprintf("command -v %s ", cmd)) != ""
 }
 
+// This needs more work: currently won't work on systemd-less systems.
 func btServiceEnabled() bool {
 	if isCommand(settings.Commands.Systemctl) {
-		return GetCommandOutput("systemctl is-enabled bluetooth.service") == "enabled" && GetCommandOutput("systemctl is-active bluetooth.service") == "active"
+		return getCommandOutput("systemctl is-enabled bluetooth.service") == "enabled" &&
+			getCommandOutput("systemctl is-active bluetooth.service") == "active"
 	}
 	return false
 }

@@ -13,24 +13,22 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
-// Check ...
-func Check(e error) {
+func check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
 
-// CreatePixbuf ...
-func CreatePixbuf(icon string, size int) *gdk.Pixbuf {
+func createPixbuf(icon string, size int) *gdk.Pixbuf {
 	// full path given
 	iconPath := ""
 	if strings.HasPrefix(icon, "/") {
 		iconPath = icon
 		pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 		if err != nil {
-			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
+			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(dataDir(),
 				"icons_light/icon-missing.svg"), size, size)
-			Check(err)
+			check(err)
 		}
 		return pixbuf
 	}
@@ -38,9 +36,9 @@ func CreatePixbuf(icon string, size int) *gdk.Pixbuf {
 	// gtk icons in use - just name given
 	if iconsDir == "" {
 		iconTheme, err := gtk.IconThemeGetDefault()
-		Check(err)
+		check(err)
 		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
-		Check(err)
+		check(err)
 
 		return pixbuf
 	}
@@ -50,21 +48,20 @@ func CreatePixbuf(icon string, size int) *gdk.Pixbuf {
 	pixbuf, err := gdk.PixbufNewFromFileAtSize(iconPath, size, size)
 	if err != nil {
 		iconTheme, err := gtk.IconThemeGetDefault()
-		Check(err)
+		check(err)
 
 		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
 		if err != nil {
-			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(DataDir(),
+			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(dataDir(),
 				"icons_light/icon-missing.svg"), size, size)
-			Check(err)
+			check(err)
 		}
 		return pixbuf
 	}
 	return pixbuf
 }
 
-// LaunchCommand starts external command and quits
-func LaunchCommand(command string) {
+func launchCommand(command string) {
 	elements := strings.Split(command, " ")
 	cmd := exec.Command(elements[0], elements[1:]...)
 	go cmd.Run()
@@ -77,8 +74,7 @@ func LaunchCommand(command string) {
 	}
 }
 
-// KeyFound checks if key in map[string]string
-func KeyFound(m map[string]string, key string) bool {
+func keyFound(m map[string]string, key string) bool {
 	for k := range m {
 		if k == key {
 			return true
@@ -91,7 +87,7 @@ func getBattery(command string) (string, int) {
 	msg := ""
 	perc := 0
 	if strings.Fields(command)[0] == "upower" {
-		bat := strings.Split(GetCommandOutput(command), "\n")
+		bat := strings.Split(getCommandOutput(command), "\n")
 		var state, time, percentage string
 		for _, line := range bat {
 			line = strings.TrimSpace(line)
@@ -119,7 +115,7 @@ func getBattery(command string) (string, int) {
 		msg = fmt.Sprintf("%d%% %s %s", perc, state, time)
 
 	} else if strings.Fields(command)[0] == "acpi" {
-		bat := strings.Fields(GetCommandOutput(command))
+		bat := strings.Fields(getCommandOutput(command))
 		msg = strings.Join(bat[2:], " ")
 		pl := len(bat[3])
 		percentage := bat[3][:pl-2]
@@ -134,7 +130,7 @@ func getBattery(command string) (string, int) {
 
 func getBrightness() float64 {
 	brightness := 0.0
-	output := GetCommandOutput(settings.Commands.GetBrightness)
+	output := getCommandOutput(settings.Commands.GetBrightness)
 	bri, e := strconv.ParseFloat(output, 64)
 	if e == nil {
 		brightness = math.Round(bri)

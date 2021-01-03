@@ -59,9 +59,7 @@
     "get_host": "uname -n",
     "get_ssid": "iwgetid -r",
     "get_user": "echo $USER",
-    "get_volume_alt": "amixer sget Master",
     "set_brightness": "light -S",
-    "set_volume_alt": "amixer sset Master",
     "systemctl": "systemctl",
     "playerctl": "playerctl"
   }
