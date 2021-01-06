@@ -66,7 +66,7 @@ Usage of nwgocc:
  ```
 
  Click the Preferences button to adjust the window to your needs. For your own custom styling, either modify the
- `~/.config/nwgocc/style.css` file, or place your own `whatever.css` in the same folder, and use the `-css` flag.
+ `~/.config/nwgocc/style.css` file, or place your own `whatever.css` in the same folder, and use the `-s` flag.
 
  You may also make a copy of `~/.config/nwgocc/config.json` under another name, for further use with the `-c` flag.
 
