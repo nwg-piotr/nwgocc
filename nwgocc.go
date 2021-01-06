@@ -23,6 +23,7 @@ var (
 	iconsDir    string
 	settings    Settings
 	config      Configuration
+	win         *gtk.Window
 )
 
 var configFile = flag.String("c", "config.json", "user's templates: Config file name")

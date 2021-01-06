@@ -195,6 +195,8 @@ func setupPreferencesWindow() {
 		gtk.MainQuit()
 	})
 
+	prefWindow.SetTransientFor(win)
+	prefWindow.SetModal(true)
 	prefWindow.Show()
 	prefWindow.Connect("key-release-event", handleEscape)
 }
