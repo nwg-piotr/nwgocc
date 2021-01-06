@@ -32,7 +32,7 @@ func setupDirs() {
 	createDir(cDir)
 	// copy files if not found
 	copyFile("/usr/share/nwgocc/cli_commands", fmt.Sprintf("%s/cli_commands", cDir))
-	copyFile("/usr/share/nwgocc/%s", fmt.Sprintf("%s/%s", cDir, *configFile))
+	copyFile("/usr/share/nwgocc/config.json", fmt.Sprintf("%s/%s", cDir, *configFile))
 	copyFile("/usr/share/nwgocc/style.css", fmt.Sprintf("%s/style.css", cDir))
 
 	// Create data dir if not found (contains icons_light/, icons_dark/, preferences.json)
