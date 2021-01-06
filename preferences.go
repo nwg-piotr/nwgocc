@@ -23,7 +23,7 @@ func setupPreferencesWindow() {
 	check(err)
 
 	if settings.Preferences.CustomStyling {
-		css := filepath.Join(configDir(), *customCSS)
+		css := filepath.Join(configDir(), *cssFile)
 		fmt.Printf("Style: %s\n", css)
 		cssProvider, err := gtk.CssProviderNew()
 		check(err)

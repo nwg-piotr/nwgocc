@@ -32,7 +32,7 @@ func setupDirs() {
 	createDir(cDir)
 	// copy files if not found
 	copyFile("/usr/share/nwgocc/cli_commands", fmt.Sprintf("%s/cli_commands", cDir))
-	copyFile("/usr/share/nwgocc/config.json", fmt.Sprintf("%s/config.json", cDir))
+	copyFile("/usr/share/nwgocc/%s", fmt.Sprintf("%s/%s", cDir, *configFile))
 	copyFile("/usr/share/nwgocc/style.css", fmt.Sprintf("%s/style.css", cDir))
 
 	// Create data dir if not found (contains icons_light/, icons_dark/, preferences.json)
@@ -197,24 +197,26 @@ type Settings struct {
 
 // Parses the config.json file and returns Configuration instance
 func loadConfig() (Configuration, error) {
-	path := fmt.Sprintf("%s/config.json", configDir())
+	path := fmt.Sprintf("%s/%s", configDir(), *configFile)
 	bytes, err := ioutil.ReadFile(path)
-	if err != nil {
-		return Configuration{}, err
-	}
+	check(err)
+	//if err != nil {
+	//	return Configuration{}, err
+	//}
 
 	var c Configuration
 	err = json.Unmarshal(bytes, &c)
-	if err != nil {
-		return Configuration{}, err
-	}
+	check(err)
+	//if err != nil {
+	//	return Configuration{}, err
+	//}
 
 	return c, nil
 }
 
 // Saves current Configuration to a json file
 func saveConfig() error {
-	path := fmt.Sprintf("%s/config.json", configDir())
+	path := fmt.Sprintf("%s/%s", configDir(), *configFile)
 	bytes, err := json.MarshalIndent(config, "", "  ")
 	if err != nil {
 		return err

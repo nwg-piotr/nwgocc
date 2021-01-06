@@ -14,7 +14,7 @@ import (
 	"github.com/itchyny/volume-go"
 )
 
-const version = "0.1.1"
+const version = "0.1.2"
 const playing string = "Playing"
 const paused string = "Paused"
 
@@ -25,11 +25,12 @@ var (
 	config      Configuration
 )
 
-var customCSS = flag.String("css", "style.css", "custom css file name")
-var debug = flag.Bool("d", false, "do checks, print results")
-var displayVersion = flag.Bool("v", false, "display version information")
-var winPosPointer = flag.Bool("p", false, "place window at the mouse pointer position (Xorg only)")
-var restoreDefaults = flag.Bool("r", false, "restore defaults (preferences, templates and icons)")
+var configFile = flag.String("c", "config.json", "user's templates: Config file name")
+var cssFile = flag.String("s", "style.css", "custom Styling: css file name")
+var debug = flag.Bool("d", false, "Do checks, print results")
+var displayVersion = flag.Bool("v", false, "display Version information")
+var winPosPointer = flag.Bool("p", false, "place window at the mouse Pointer position (Xorg only)")
+var restoreDefaults = flag.Bool("r", false, "Restore defaults (preferences, templates and icons)")
 
 // These values need updates
 var (
@@ -658,6 +659,7 @@ func main() {
 
 	// Load user-defined CustomRows and Buttons from ~/.config/config.json
 	config, _ = loadConfig()
+	fmt.Printf("Templates: '%s'\n", *configFile)
 
 	// Empty means: gtk icons in use
 	iconsDir = ""
@@ -674,7 +676,7 @@ func main() {
 	gtk.Init(nil)
 
 	if settings.Preferences.CustomStyling {
-		css := filepath.Join(configDir(), *customCSS)
+		css := filepath.Join(configDir(), *cssFile)
 		fmt.Printf("Style: '%s'\n", css)
 		cssProvider, err := gtk.CssProviderNew()
 		check(err)
