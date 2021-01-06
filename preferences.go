@@ -313,6 +313,8 @@ func setupCmdDialog(command *string) {
 
 	win.SetTransientFor(prefWindow)
 	win.SetModal(true)
+	win.SetKeepAbove(true)
+	win.SetDecorated(false)
 	win.SetTypeHint(gdk.WINDOW_TYPE_HINT_DIALOG)
 	win.SetTitle("nwgocc: Edit command")
 	win.SetProperty("name", "preferences")
