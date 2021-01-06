@@ -55,16 +55,20 @@ Sample user defined commands use `blueman` and `NetworkManager`.
 
 ```text
 Usage of nwgocc:
-  -css string
-    	custom css file name (default "style.css")
-  -d	do checks, print results
-  -p	place window at the mouse pointer position (Xorg only)
-  -r	restore defaults (preferences, templates and icons)
-  -v	display version information
+  -c string
+    	user's templates: Config file name (default "config.json")
+  -d	Do checks, print results
+  -p	place window at the mouse Pointer position (Xorg only)
+  -r	Restore defaults (preferences, templates and icons)
+  -s string
+    	custom Styling: css file name (default "style.css")
+  -v	display Version information
  ```
 
  Click the Preferences button to adjust the window to your needs. For your own custom styling, either modify the
  `~/.config/nwgocc/style.css` file, or place your own `whatever.css` in the same folder, and use the `-css` flag.
+
+ You may also make a copy of `~/.config/nwgocc/config.json` under another name, for further use with the `-c` flag.
 
 ## Credits
 
