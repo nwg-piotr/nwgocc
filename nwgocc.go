@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"path/filepath"
+	"strconv"
+	"syscall"
 	"time"
 
+	"github.com/allan-simon/go-singleinstance"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
@@ -640,6 +644,36 @@ func handleKeyboard(window *gtk.Window, event *gdk.Event) {
 
 func main() {
 	timeStart := time.Now()
+
+	// Gentle SIGTERM handler thanks to reiki4040 https://gist.github.com/reiki4040/be3705f307d3cd136e85
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGTERM)
+	go func() {
+		for {
+			s := <-signalChan
+			if s == syscall.SIGTERM {
+				fmt.Println("SIGTERM received, bye bye!")
+				gtk.MainQuit()
+			}
+		}
+	}()
+
+	// We don't want multiple instances. For better user experience (when nwgocc attached to a button or a key binding),
+	// let's kill the running instance and exit.
+	lockFilePath := fmt.Sprintf("%s/nwgocc.lock", tempDir())
+	lockFile, err := singleinstance.CreateLockFile(lockFilePath)
+	if err != nil {
+		pid, err := readTextFile(lockFilePath)
+		if err == nil {
+			i, err := strconv.Atoi(pid)
+			if err == nil {
+				fmt.Println("Running instance found, sending SIGTERM and exiting...")
+				syscall.Kill(i, syscall.SIGTERM)
+			}
+		}
+		os.Exit(0)
+	}
+	defer lockFile.Close()
 
 	flag.Parse()
 

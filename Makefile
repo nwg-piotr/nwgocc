@@ -3,6 +3,7 @@ get:
 	go get github.com/gotk3/gotk3/glib
 	go get github.com/gotk3/gotk3/gtk
 	go get github.com/itchyny/volume-go
+	go get github.com/allan-simon/go-singleinstance
 
 build:
 	go build -o bin/nwgocc *.go
