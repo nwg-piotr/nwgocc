@@ -12,6 +12,7 @@ install:
 	mkdir -p /usr/share/nwgocc
 	cp configs/* /usr/share/nwgocc
 	cp preferences.glade /usr/share/nwgocc
+	cp nwgocc.desktop /usr/share/applications
 	cp -R icons_light /usr/share/nwgocc
 	cp -R icons_dark /usr/share/nwgocc
 	cp bin/nwgocc /usr/bin
@@ -19,6 +20,7 @@ install:
 uninstall:
 	rm -r /usr/share/nwgocc
 	rm /usr/bin/nwgocc
+	rm /usr/share/applications/nwgocc.desktop
 
 run:
 	go run *.go

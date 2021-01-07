@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Control Center
+Comment=nwg Control Center written in Go
+Exec=nwgocc
+Icon=/usr/share/nwgocc/nwgocc.svg
+Terminal=false
+Type=Application
+Categories=System;Settings;Utility;
