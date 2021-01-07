@@ -11,6 +11,17 @@ import (
 	"strings"
 )
 
+func tempDir() string {
+	if os.Getenv("TMPDIR") != "" {
+		return os.Getenv("TMPDIR")
+	} else if os.Getenv("TEMP") != "" {
+		return os.Getenv("TEMP")
+	} else if os.Getenv("TMP") != "" {
+		return os.Getenv("TMP")
+	}
+	return "/tmp"
+}
+
 func configDir() string {
 	if os.Getenv("XDG_CONFIG_HOME") != "" {
 		return (fmt.Sprintf("%s/nwgocc", os.Getenv("XDG_CONFIG_HOME")))
@@ -200,16 +211,10 @@ func loadConfig() (Configuration, error) {
 	path := fmt.Sprintf("%s/%s", configDir(), *configFile)
 	bytes, err := ioutil.ReadFile(path)
 	check(err)
-	//if err != nil {
-	//	return Configuration{}, err
-	//}
 
 	var c Configuration
 	err = json.Unmarshal(bytes, &c)
 	check(err)
-	//if err != nil {
-	//	return Configuration{}, err
-	//}
 
 	return c, nil
 }
@@ -268,6 +273,15 @@ func loadCliCommands() []string {
 		}
 	}
 	return output
+}
+
+func readTextFile(path string) (string, error) {
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }
 
 func saveCliFile(s string) {

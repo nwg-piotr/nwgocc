@@ -38,14 +38,12 @@ Sample user defined commands use `blueman` and `NetworkManager`.
 
 ## Installation
 
-0. Install dependencies and your selection of optional dependencies.
-
-1. `git clone https://github.com/nwg-piotr/nwgocc.git`
-2. `cd nwgocc`
-3. `make get` (This may take some time; you may skip this step next time.)
-4. `make build`
-5. `sudo make install`
-
+- Install dependencies and your selection of optional dependencies.
+- `git clone https://github.com/nwg-piotr/nwgocc.git`
+- `cd nwgocc`
+- `make get` (This may take a while; provided that no new libraries added, you may skip this step next time.)
+- `make build`
+- `sudo make install`
 
 ## To uninstall
 
@@ -76,8 +74,12 @@ Usage of nwgocc:
 Copyright (c) 2015-2018 gotk3 contributors, released under the terms of the
 [ISC License](https://github.com/gotk3/gotk3/blob/master/LICENSE).
 
-- Sound control relies on the [volume-go](https://github.com/itchyny/volume-go) package, Copyright (c) 2017-2020 itchyny,
+- Volume control relies on the [volume-go](https://github.com/itchyny/volume-go) package, Copyright (c) 2017-2020 itchyny,
 released under the terms of the [MIT License](https://github.com/itchyny/volume-go/blob/master/LICENSE).
+
+- Handling multiple instances relies on the [go-singleinstance](https://github.com/allan-simon/go-singleinstance)
+library, Copyright (c) 2015 Allan Simon, released under the terms of the
+[MIT License](https://github.com/allan-simon/go-singleinstance/blob/master/LICENSE).
 
 - Most of custom icons come from my favorite [Papirus icon theme](https://github.com/PapirusDevelopmentTeam/papirus-icon-theme),
 released under the terms of the
