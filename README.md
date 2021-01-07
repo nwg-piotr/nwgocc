@@ -41,7 +41,7 @@ Sample user defined commands use `blueman` and `NetworkManager`.
 - Install dependencies and your selection of optional dependencies.
 - `git clone https://github.com/nwg-piotr/nwgocc.git`
 - `cd nwgocc`
-- `make get` (This may take a while; you may skip this step next time.)
+- `make get` (This may take a while; provided that no new libraries added, you may skip this step next time.)
 - `make build`
 - `sudo make install`
 
