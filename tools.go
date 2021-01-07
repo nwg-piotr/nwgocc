@@ -38,7 +38,11 @@ func createPixbuf(icon string, size int) *gdk.Pixbuf {
 		iconTheme, err := gtk.IconThemeGetDefault()
 		check(err)
 		pixbuf, err := iconTheme.LoadIcon(icon, size, gtk.ICON_LOOKUP_FORCE_SIZE)
-		check(err)
+		if err != nil {
+			pixbuf, err = gdk.PixbufNewFromFileAtSize(filepath.Join(dataDir(),
+				"icons_light/icon-missing.svg"), size, size)
+			check(err)
+		}
 
 		return pixbuf
 	}

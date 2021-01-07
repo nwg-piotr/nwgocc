@@ -729,7 +729,6 @@ func main() {
 	check(err)
 
 	win.SetTitle("nwgocc: Control Center")
-	fmt.Println(">>>> win.SetIcon")
 	win.SetIconName("nwgocc")
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
