@@ -729,7 +729,8 @@ func main() {
 	check(err)
 
 	win.SetTitle("nwgocc: Control Center")
-	win.SetIcon(createPixbuf("/usr/share/nwgocc/nwgocd.svg", settings.Preferences.IconSizeSmall))
+	fmt.Println(">>>> win.SetIcon")
+	win.SetIconName("nwgocc")
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
 	if *winPosPointer {
