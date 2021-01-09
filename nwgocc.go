@@ -602,7 +602,11 @@ func setupPreferencesButton() *gtk.Button {
 	if settings.Preferences.CustomStyling {
 		button.SetProperty("name", "custom-button")
 	}
-	pixbuf := createPixbuf("emblem-system-symbolic", settings.Preferences.IconSizeLarge)
+	ico := "nwgocc"
+	if iconsDir != "" {
+		ico = fmt.Sprintf("%s/nwgocc-symbolic.svg", iconsDir)
+	}
+	pixbuf := createPixbuf(ico, settings.Preferences.IconSizeLarge)
 	image, _ := gtk.ImageNewFromPixbuf(pixbuf)
 	button.SetImage(image)
 	button.SetAlwaysShowImage(true)
