@@ -23,11 +23,12 @@ const playing string = "Playing"
 const paused string = "Paused"
 
 var (
-	cliCommands []string
-	iconsDir    string
-	settings    Settings
-	config      Configuration
-	win         *gtk.Window
+	cliCommands   []string
+	netInterfaces []string
+	iconsDir      string
+	settings      Settings
+	config        Configuration
+	win           *gtk.Window
 )
 
 var configFile = flag.String("c", "config.json", "user's templates: Config file name")
@@ -42,6 +43,10 @@ var (
 	wifiIcon  string // to track changes (avoid creating the icon if status unchanged; same below)
 	wifiLabel *gtk.Label
 	wifiImage *gtk.Image
+
+	interfaceIcon  string
+	interfaceLabel *gtk.Label
+	interfaceImage *gtk.Image
 
 	btIcon  string
 	btLabel *gtk.Label
@@ -199,6 +204,96 @@ func updateWifiRow() {
 		wifiIcon = icon
 	}
 	wifiLabel.SetText(status)
+}
+
+// Shows icon appropriate to selecten net interface status
+func setupInterfaceRow() *gtk.EventBox {
+	eventBox, _ := gtk.EventBoxNew()
+	styleContext, _ := eventBox.GetStyleContext()
+	hBox, _ := gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 10)
+	if settings.Preferences.CustomStyling {
+		hBox.SetProperty("name", "row-normal")
+	}
+
+	netInterfaces = listInterfaces()
+	isUp := false
+	addr := ""
+	if settings.Preferences.InterfaceName != "" {
+		isUp, addr = interfaceIsUp(settings.Preferences.InterfaceName)
+	}
+
+	if isUp {
+		interfaceIcon = settings.Icons.NetworkConnected
+	} else {
+		interfaceIcon = settings.Icons.NetworkDisonnected
+	}
+
+	interfaceText := "Not selected"
+	if settings.Preferences.InterfaceName != "" {
+		if isUp {
+			interfaceText = fmt.Sprintf("%s: %s", settings.Preferences.InterfaceName, addr)
+		} else {
+			interfaceText = settings.Preferences.InterfaceName
+		}
+	}
+
+	pixbuf := createPixbuf(interfaceIcon, settings.Preferences.IconSizeSmall)
+	interfaceImage, _ = gtk.ImageNew()
+	interfaceImage.SetFromPixbuf(pixbuf)
+	hBox.PackStart(interfaceImage, false, false, 2)
+
+	interfaceLabel, _ = gtk.LabelNew(interfaceText)
+	hBox.PackStart(interfaceLabel, false, false, 2)
+
+	if settings.Preferences.OnClickInterface != "" {
+		pixbuf := createPixbuf(settings.Icons.ClickMe, settings.Preferences.IconSizeSmall)
+		image, _ := gtk.ImageNewFromPixbuf(pixbuf)
+		hBox.PackEnd(image, false, false, 2)
+
+		eventBox.Connect("button-press-event", func() {
+			launchCommand(settings.Preferences.OnClickInterface)
+		})
+		eventBox.Connect("enter-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-selected")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_SELECTED)
+			}
+		})
+		eventBox.Connect("leave-notify-event", func() {
+			if settings.Preferences.CustomStyling {
+				hBox.SetProperty("name", "row-normal")
+			} else {
+				styleContext.SetState(gtk.STATE_FLAG_NORMAL)
+			}
+		})
+	}
+
+	eventBox.Add(hBox)
+
+	return eventBox
+}
+
+func updateInterfaceRow() {
+	var icon string
+	isUp, addr := interfaceIsUp(settings.Preferences.InterfaceName)
+	if isUp {
+		icon = settings.Icons.NetworkConnected
+	} else {
+		icon = settings.Icons.NetworkDisonnected
+	}
+	if icon != interfaceIcon {
+		pixbuf := createPixbuf(icon, settings.Preferences.IconSizeSmall)
+		interfaceImage.SetFromPixbuf(pixbuf)
+		interfaceIcon = icon
+	}
+	var interfaceText string
+	if isUp {
+		interfaceText = fmt.Sprintf("%s: %s", settings.Preferences.InterfaceName, addr)
+	} else {
+		interfaceText = settings.Preferences.InterfaceName
+	}
+	interfaceLabel.SetText(interfaceText)
 }
 
 // Shows icon appropriate to status + output of `bluetoothctl show | awk '/Name/{print $2}'`
@@ -690,6 +785,7 @@ func main() {
 
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgocc/preferences.json
 	settings, _ = loadSettings()
+	checkMissingSettings()
 
 	// On `-d` check and print commands availability
 	if *debug {
@@ -793,6 +889,12 @@ func main() {
 		vBox.PackStart(wifiRow, false, false, 4)
 	}
 
+	var interfaceRow *gtk.EventBox
+	if settings.Preferences.ShowInterfaceLine {
+		interfaceRow = setupInterfaceRow()
+		vBox.PackStart(interfaceRow, false, false, 4)
+	}
+
 	var btRow *gtk.EventBox
 	if settings.Preferences.ShowBtLine && btServiceEnabled() {
 		btRow = setupBluetoothRow()
@@ -858,6 +960,11 @@ func main() {
 		if wifiRow != nil {
 			updateWifiRow()
 		}
+
+		if interfaceRow != nil {
+			updateInterfaceRow()
+		}
+
 		if btRow != nil {
 			updateBluetoothRow()
 		}

@@ -92,6 +92,11 @@ func setupPreferencesWindow() {
 		settings.Preferences.ShowUserButtons = cbUserButtons.GetActive()
 	})
 
+	cbNetInterface := setUpCheckButton(builder, "checkbutton_interface", settings.Preferences.ShowInterfaceLine)
+	cbNetInterface.Connect("toggled", func() {
+		settings.Preferences.ShowInterfaceLine = cbNetInterface.GetActive()
+	})
+
 	// Buttons to edit user-defined commands assigned to built-in rows
 	btnUser := setButtonImage(builder, "cmd_btn_user", settings.Icons.ClickMe)
 	btnUser.Connect("clicked", func() {
@@ -109,6 +114,10 @@ func setupPreferencesWindow() {
 	btnBattery.Connect("clicked", func() {
 		setupCmdDialog(&settings.Preferences.OnClickBattery)
 	})
+	btnInterface := setButtonImage(builder, "cmd_btn_interface", settings.Icons.ClickMe)
+	btnInterface.Connect("clicked", func() {
+		setupCmdDialog(&settings.Preferences.OnClickInterface)
+	})
 
 	// Lower checkboxes for various boolean settings
 	cbCustomStyling := setUpCheckButton(builder, "checkbutton_custom_css", settings.Preferences.CustomStyling)
@@ -124,6 +133,12 @@ func setupPreferencesWindow() {
 	cbWindowDecorations := setUpCheckButton(builder, "checkbutton_window_decorations", settings.Preferences.WindowDecorations)
 	cbWindowDecorations.Connect("toggled", func() {
 		settings.Preferences.WindowDecorations = cbWindowDecorations.GetActive()
+	})
+
+	// ComboBox to select Net inteface
+	cBoxNetInterface := setUpNetInterfaceCombo(builder, "combo_box_interface")
+	cBoxNetInterface.Connect("changed", func() {
+		settings.Preferences.InterfaceName = cBoxNetInterface.GetActiveID()
 	})
 
 	// ComboBox to select active icon set
@@ -262,6 +277,22 @@ func setUpCliTextView(builder *gtk.Builder, id string) *gtk.TextView {
 		buffer, _ := tv.GetBuffer()
 		buffer.SetText(strings.Join(cliCommands, "\n"))
 		return tv
+	}
+	return nil
+}
+
+func setUpNetInterfaceCombo(builder *gtk.Builder, id string) *gtk.ComboBoxText {
+	obj, err := builder.GetObject(id)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	if cb, ok := obj.(*gtk.ComboBoxText); ok {
+		for _, nif := range netInterfaces {
+			cb.Append(nif, nif)
+		}
+		cb.SetActiveID(settings.Preferences.InterfaceName)
+		return cb
 	}
 	return nil
 }
@@ -762,10 +793,20 @@ func setupIconsEditionWindow() {
 	grid.Attach(entry, 1, 21, 1, 1)
 	grid.Attach(fcBtn, 2, 21, 1, 1)
 
-	lbl, entry, fcBtn = iconEditionFields("click-me", settings.Icons.ClickMe)
+	lbl, entry, fcBtn = iconEditionFields("network-connected", settings.Icons.NetworkConnected)
 	grid.Attach(lbl, 0, 22, 1, 1)
 	grid.Attach(entry, 1, 22, 1, 1)
 	grid.Attach(fcBtn, 2, 22, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("network-disconnected", settings.Icons.NetworkDisonnected)
+	grid.Attach(lbl, 0, 23, 1, 1)
+	grid.Attach(entry, 1, 23, 1, 1)
+	grid.Attach(fcBtn, 2, 23, 1, 1)
+
+	lbl, entry, fcBtn = iconEditionFields("click-me", settings.Icons.ClickMe)
+	grid.Attach(lbl, 0, 24, 1, 1)
+	grid.Attach(entry, 1, 24, 1, 1)
+	grid.Attach(fcBtn, 2, 24, 1, 1)
 
 	hbox, _ = gtk.BoxNew(gtk.ORIENTATION_HORIZONTAL, 0)
 
