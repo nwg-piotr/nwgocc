@@ -18,7 +18,7 @@ import (
 	"github.com/itchyny/volume-go"
 )
 
-const version = "0.1.3"
+const version = "0.1.4"
 const playing string = "Playing"
 const paused string = "Paused"
 
@@ -829,7 +829,10 @@ func main() {
 	check(err)
 
 	win.SetTitle("nwgocc: Control Center")
-	win.SetIconName("nwgocc")
+	err = win.SetIconFromFile("/usr/share/pixmaps/nwgocc.svg")
+	if err != nil {
+		win.SetIconName("nwgocc")
+	}
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)
 	if *winPosPointer {
