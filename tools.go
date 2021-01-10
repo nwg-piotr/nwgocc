@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"net"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -146,4 +147,39 @@ func getBrightness() float64 {
 func setBrightness(value int) {
 	cmd := exec.Command("light", "-S", fmt.Sprint(value))
 	cmd.Run()
+}
+
+func listInterfaces() []string {
+	var list []string
+
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return list
+	}
+
+	for _, i := range interfaces {
+		list = append(list, i.Name)
+	}
+
+	return list
+}
+
+func interfaceIsUp(name string) (bool, string) {
+	netInterface, err := net.InterfaceByName(name)
+
+	if err != nil {
+		fmt.Println(err)
+		return false, ""
+	}
+
+	addrs, _ := netInterface.Addrs()
+	if len(addrs) > 1 {
+		ip := addrs[0].String()
+		if strings.Contains(ip, "/") {
+			ip = strings.Split(ip, "/")[0]
+		}
+		return true, ip
+	}
+
+	return false, ""
 }

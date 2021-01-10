@@ -145,6 +145,7 @@ type Preferences struct {
 	ShowWifiLine         bool   `json:"show_wifi_line"`
 	ShowBtLine           bool   `json:"show_bt_line"`
 	ShowBatteryLine      bool   `json:"show_battery_line"`
+	ShowInterfaceLine    bool   `json:"show_interface_line"`
 	ShowUserRows         bool   `json:"show_user_rows"`
 	ShowUserButtons      bool   `json:"show_user_buttons"`
 	IconSizeSmall        int    `json:"icon_size_small"`
@@ -156,6 +157,8 @@ type Preferences struct {
 	OnClickWifi          string `json:"on-click-wifi"`
 	OnClickBluetooth     string `json:"on-click-bluetooth"`
 	OnClickBattery       string `json:"on-click-battery"`
+	OnClickInterface     string `json:"on-click-interface"`
+	InterfaceName        string `json:"interface-name"`
 }
 
 // Icons store icon definitions
@@ -182,6 +185,8 @@ type Icons struct {
 	MediaSkipBackward  string `json:"media-skip-backward"`
 	MediaSkipForward   string `json:"media-skip-forward"`
 	ClickMe            string `json:"click-me"`
+	NetworkConnected   string `json:"network-connected"`
+	NetworkDisonnected string `json:"network-disconnected"`
 }
 
 // Commands store external commands
@@ -256,6 +261,16 @@ func saveSettings() error {
 	}
 
 	return ioutil.WriteFile(path, bytes, 0644)
+}
+
+// Set newly introduced values if not found in preferences.json
+func checkMissingSettings() {
+	if settings.Icons.NetworkConnected == "" {
+		settings.Icons.NetworkConnected = "network-wired-symbolic"
+	}
+	if settings.Icons.NetworkDisonnected == "" {
+		settings.Icons.NetworkDisonnected = "network-wired-disconnected-symbolic"
+	}
 }
 
 // Parses the cli_commands txt file and returns shell commands as []string slice
