@@ -18,7 +18,7 @@ import (
 	"github.com/itchyny/volume-go"
 )
 
-const version = "0.1.4"
+const version = "0.1.5"
 const playing string = "Playing"
 const paused string = "Paused"
 
@@ -68,6 +68,7 @@ var (
 )
 
 var configChanged = false
+var wayland bool
 
 // Shows output of CLI commands defined in `~/.config/nwgocc/cli_commands` text file
 func setupCliLabel() *gtk.Label {
@@ -781,6 +782,9 @@ func main() {
 		os.Exit(0)
 	}
 
+	wayland = isWayland()
+	fmt.Printf("Wayland: %t\n", wayland)
+
 	setupDirs()
 
 	// Load Preferences, Icons and Commands from ~/.local/share/nwgocc/preferences.json
@@ -829,9 +833,11 @@ func main() {
 	check(err)
 
 	win.SetTitle("nwgocc: Control Center")
-	err = win.SetIconFromFile("/usr/share/pixmaps/nwgocc.svg")
-	if err != nil {
-		win.SetIconName("nwgocc")
+	if !wayland {
+		err = win.SetIconFromFile("/usr/share/pixmaps/nwgocc.svg")
+		if err != nil {
+			win.SetIconName("nwgocc")
+		}
 	}
 	win.SetProperty("name", "window")
 	win.SetDecorated(settings.Preferences.WindowDecorations)

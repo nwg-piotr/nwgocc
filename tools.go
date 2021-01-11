@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -18,6 +19,10 @@ func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func isWayland() bool {
+	return os.Getenv("XDG_SESSION_TYPE") == "wayland" || os.Getenv("WAYLAND_DISPLAY") != ""
 }
 
 func createPixbuf(icon string, size int) *gdk.Pixbuf {
